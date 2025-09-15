@@ -48,6 +48,8 @@ export class AnimeService {
         sinopses: anime.synopsis,
         title: anime.title,
         image_url: anime.images.jpg.large_image_url,
+        year: String(anime?.year),
+        episodes: String(anime?.episodes),
         genres: anime.genres.map((genre) => {
           return {
             mal_id: genre.mal_id,

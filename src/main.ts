@@ -22,8 +22,6 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3000;
   logger.log(`App:     http://localhost:${port}`);
   logger.log(`Swagger: http://localhost:${port}/api`);
-  logger.log('NODE_OPTIONS=', process.env.NODE_OPTIONS);
-  logger.log('JINKAN_BASE_URL=', process.env.JINKAN_BASE_URL);
 }
 
 void bootstrap();
