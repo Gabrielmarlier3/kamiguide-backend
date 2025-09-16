@@ -5,11 +5,22 @@ import { ISeasonNow, Season } from './interface/season-now.interface';
 import { IPopularAnime, Tops } from './interface/popular-anime.interface';
 import { Genre, IGenreSorted } from './interface/genre-sorted.interface';
 import { IAnimeQuery, Quered } from './interface/anime-query.interface';
+import { Agent } from 'https';
 import axios, { AxiosResponse } from 'axios';
+import * as dns from 'node:dns';
 
 @Injectable()
 export class JikanService {
   private base_url = process.env.JINKAN_BASE_URL ?? 'https://api.jikan.moe/v4';
+  private agent: Agent;
+
+  constructor() {
+    this.agent = new Agent({
+      lookup: (hostname, options, callback) => {
+        return dns.lookup(hostname, { ...options, family: 4 }, callback);
+      },
+    });
+  }
 
   async getSeasonAnime(limit: number = 3): Promise<Season[]> {
     try {
@@ -22,7 +33,11 @@ export class JikanService {
 
       const response: AxiosResponse<ISeasonNow> = await axios.get(
         `${this.base_url}/seasons/now?limit=${limit}`,
-        { headers: { accept: 'application/json' }, timeout: 60_000 },
+        {
+          headers: { accept: 'application/json' },
+          timeout: 60_000,
+          httpsAgent: this.agent,
+        },
       );
 
       if (!response.data) {
@@ -55,7 +70,11 @@ export class JikanService {
 
       const response: AxiosResponse<IPopularAnime> = await axios.get(
         `${this.base_url}/top/anime?limit=${limit}`,
-        { headers: { accept: 'application/json' }, timeout: 60_000 },
+        {
+          headers: { accept: 'application/json' },
+          timeout: 60_000,
+          httpsAgent: this.agent,
+        },
       );
 
       if (!response.data) {
@@ -135,7 +154,11 @@ export class JikanService {
 
       const response: AxiosResponse<IAnimeQuery> = await axios.get(
         `${this.base_url}/anime?q=${encodeURIComponent(name)}&sfw=true&page=${page}`,
-        { headers: { accept: 'application/json' }, timeout: 60_000 },
+        {
+          headers: { accept: 'application/json' },
+          timeout: 60_000,
+          httpsAgent: this.agent,
+        },
       );
 
       if (!response.data) {
@@ -168,7 +191,11 @@ export class JikanService {
 
       const response: AxiosResponse<IFullAnime> = await axios.get(
         `${this.base_url}/anime/${id}/full`,
-        { headers: { accept: 'application/json' }, timeout: 60_000 },
+        {
+          headers: { accept: 'application/json' },
+          timeout: 60_000,
+          httpsAgent: this.agent,
+        },
       );
 
       if (!response.data) {
@@ -201,7 +228,11 @@ export class JikanService {
 
       const response: AxiosResponse<IAnimeQuery> = await axios.get(
         `${this.base_url}/anime/${id}/recommendations`,
-        { headers: { accept: 'application/json' }, timeout: 60_000 },
+        {
+          headers: { accept: 'application/json' },
+          timeout: 60_000,
+          httpsAgent: this.agent,
+        },
       );
 
       if (!response.data) {
