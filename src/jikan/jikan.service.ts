@@ -1,18 +1,20 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { GenreAnimeDto } from './dto/genre-anime.dto';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { AnimeDetails, IFullAnime } from './interface/full-anime.interface';
 import { ISeasonNow, Season } from './interface/season-now.interface';
 import { IPopularAnime, Tops } from './interface/popular-anime.interface';
-import { Genre, IGenreSorted } from './interface/genre-sorted.interface';
+import { IGenreSorted } from './interface/genre-sorted.interface';
 import { IAnimeQuery, Quered } from './interface/anime-query.interface';
 import { Agent } from 'https';
 import axios, { AxiosResponse } from 'axios';
 import * as dns from 'node:dns';
+import { IGenreAnimeFilter } from './interface/genre-anime.interface';
+import { GenreReturn } from './interface/genre-return.interface';
 
 @Injectable()
 export class JikanService {
+  private logger: Logger = new Logger(JikanService.name);
   private base_url = process.env.JINKAN_BASE_URL ?? 'https://api.jikan.moe/v4';
-  private agent: Agent;
+  private readonly agent: Agent;
 
   constructor() {
     this.agent = new Agent({
@@ -49,6 +51,9 @@ export class JikanService {
 
       return response.data.data;
     } catch (error: any) {
+      this.logger.error(
+        `[getSeasonAnime] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
@@ -86,6 +91,9 @@ export class JikanService {
 
       return response.data.data;
     } catch (error: any) {
+      this.logger.error(
+        `[getPopularRecomendation] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
@@ -96,7 +104,7 @@ export class JikanService {
     }
   }
 
-  async getAnimeByGenre(filter: GenreAnimeDto): Promise<Genre[]> {
+  async getAnimeByGenre(filter: IGenreAnimeFilter): Promise<GenreReturn> {
     try {
       if (isNaN(Number(filter.limit))) {
         throw new HttpException(
@@ -111,7 +119,7 @@ export class JikanService {
         );
       }
 
-      let url = `${this.base_url}/anime?genres=${filter.genreId}&order_by=${filter.order_by}&sort=${filter.sort}&limit=${filter.limit}&sfw=true&page=${filter.page ?? 1}`;
+      let url = `${this.base_url}/anime?genres=${filter.genreId}&order_by=${filter.order_by ?? 'score'}&sort=${filter.sort ?? 'desc'}&limit=${filter.limit ?? '12'}&sfw=true&page=${filter.page ?? 1}`;
       if (filter.year) {
         url += `&start_date=${filter.year}-01-01&end_date=${filter.year}-12-31`;
       }
@@ -119,6 +127,7 @@ export class JikanService {
       const response: AxiosResponse<IGenreSorted> = await axios.get(url, {
         headers: { accept: 'application/json' },
         timeout: 60_000,
+        httpsAgent: this.agent,
       });
 
       if (!response.data) {
@@ -127,9 +136,14 @@ export class JikanService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-
-      return response.data.data;
+      return {
+        length: response.data.pagination.items.total,
+        animes: response.data.data,
+      };
     } catch (error: any) {
+      this.logger.error(
+        `[getAnimeByGenre] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
@@ -170,6 +184,9 @@ export class JikanService {
 
       return response.data.data;
     } catch (error: any) {
+      this.logger.error(
+        `[getAnimeByName] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
@@ -207,6 +224,9 @@ export class JikanService {
 
       return response.data.data;
     } catch (error: any) {
+      this.logger.error(
+        `[getAnimeDetailsById] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
@@ -244,6 +264,9 @@ export class JikanService {
 
       return response.data.data;
     } catch (error: any) {
+      this.logger.error(
+        `[getSimilarAnime] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
