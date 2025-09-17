@@ -1,5 +1,13 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { GenreSearchDto, GENRES, GenreTabDto } from './dto/genreSearchDto';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+} from '@nestjs/common';
+import { GenreTabDto, AvailableGenres } from './dto/genreSearchDto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AnimeService } from './anime.service';
 import { StaffRecomendationDto } from './dto/staff-recomendation.dto';
@@ -29,11 +37,16 @@ export class AnimeController {
     return await this.animeService.getExploreRecomendation();
   }
 
-  @Get('explore/:genre')
+  @Get('explore/:genre/:page')
   async getAnimeByGender(
-    @Param('genre') genre: GenreSearchDto,
-  ): Promise<GenreTabDto[]> {
-    return await this.animeService.getAnimeByGenre(genre);
+    @Param('genre') genre: AvailableGenres,
+    @Param('page') page: number,
+  ): Promise<GenreTabDto> {
+    if (isNaN(page) || page < 1) page = 1;
+    if (!Object.values(AvailableGenres).includes(genre)) {
+      throw new HttpException('Genre not found', HttpStatus.BAD_REQUEST);
+    }
+    return await this.animeService.getAnimeByGenre(genre, page);
   }
 
   @Post('search')
@@ -42,7 +55,7 @@ export class AnimeController {
   }
 
   @Get('available-genres')
-  getAvailableGenres(): typeof GENRES {
-    return GENRES;
+  getAvailableGenres(): AvailableGenres[] {
+    return Object.values(AvailableGenres);
   }
 }

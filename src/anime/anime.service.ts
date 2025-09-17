@@ -1,22 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { JikanService } from '../jikan/jikan.service';
 import { Season } from '../jikan/interface/season-now.interface';
-import { AnimeGenreId, Genre } from '../jikan/interface/genre-sorted.interface';
+import { AnimeGenreId } from '../jikan/interface/genre-sorted.interface';
 import { StaffRecomendationDto } from './dto/staff-recomendation.dto';
 import { PopularDto } from './dto/popular.dto';
 import { Tops } from '../jikan/interface/popular-anime.interface';
 import { ExploreAnime, ExploreDto } from './dto/explore.dto';
-import { GENRES, GenreSearchDto, GenreTabDto } from './dto/genreSearchDto';
+import {
+  AvailableGenres,
+  GenreDetailDto,
+  GenreTabDto,
+} from './dto/genreSearchDto';
 import { Quered } from '../jikan/interface/anime-query.interface';
 import { SearchDto } from './dto/search.dto';
+import { GenreReturn } from '../jikan/interface/genre-return.interface';
 
 @Injectable()
 export class AnimeService {
   private jikan: JikanService = new JikanService();
 
   async getExploreRecomendation(): Promise<ExploreDto[]> {
-    const exploreData: Genre[][] = [];
-    for (const genreName of GENRES) {
+    const exploreData: GenreReturn[] = [];
+    for (const genreName of Object.keys(AvailableGenres)) {
       exploreData.push(
         await this.jikan.getAnimeByGenre({
           limit: 5,
@@ -24,7 +29,8 @@ export class AnimeService {
         }),
       );
     }
-    return exploreData.map((genre) => {
+    return exploreData.map((data) => {
+      const genre = data.animes;
       return {
         genre: genre[0].name,
         animes: genre.map((anime) => {
@@ -67,7 +73,7 @@ export class AnimeService {
       return {
         mal_id: anime.mal_id,
         title: anime.title,
-        image_url: anime.images.jpg.small_image_url,
+        image_url: anime.images.jpg.image_url,
         score: anime.score,
         status: anime.status,
         genres: anime.genres.map((genre) => {
@@ -81,24 +87,31 @@ export class AnimeService {
     }) as PopularDto[];
   }
 
-  async getAnimeByGenre(genreOptions: GenreSearchDto): Promise<GenreTabDto[]> {
-    const animes: Genre[] = await this.jikan.getAnimeByGenre({
-      genreId: AnimeGenreId[genreOptions.genre as keyof typeof AnimeGenreId],
+  async getAnimeByGenre(
+    genreOptions: AvailableGenres,
+    page: number,
+  ): Promise<GenreTabDto> {
+    const animes: GenreReturn = await this.jikan.getAnimeByGenre({
+      genreId: AnimeGenreId[genreOptions as keyof typeof AnimeGenreId],
       limit: 20,
-      page: genreOptions.page,
+      page: page,
     });
-    return animes.map((anime) => {
-      return {
-        mal_id: anime.mal_id,
-        title: anime.title,
-        image_url: anime.images.jpg.large_image_url,
-        score: anime.score,
-        type: anime.type == 'TV' ? 'Series' : anime.type,
-        status: anime.status,
-        season: anime.season,
-        year: anime.year,
-      };
-    }) as GenreTabDto[];
+
+    return {
+      total: animes.length,
+      animes: animes.animes.map((anime) => {
+        return {
+          mal_id: anime.mal_id,
+          title: anime.title,
+          image_url: anime.images.jpg.large_image_url,
+          score: anime.score,
+          type: anime.type == 'TV' ? 'Series' : anime.type,
+          status: anime.status,
+          season: anime.season,
+          year: anime.year,
+        };
+      }) as GenreDetailDto[],
+    };
   }
 
   async getAnimeByName(name: string): Promise<SearchDto[]> {
