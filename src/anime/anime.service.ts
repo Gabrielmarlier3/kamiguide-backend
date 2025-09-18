@@ -2,24 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { JikanService } from '../jikan/jikan.service';
 import { Season } from '../jikan/interface/season-now.interface';
 import { AnimeGenreId } from '../jikan/interface/genre-sorted.interface';
-import { StaffRecomendationDto } from './dto/staff-recomendation.dto';
-import { PopularDto } from './dto/popular.dto';
+import { StaffRecomendationResponseDto } from './dto/staff-recomendation.response.dto';
+import { PopularResponseDto } from './dto/popular.response.dto';
 import { Tops } from '../jikan/interface/popular-anime.interface';
-import { ExploreAnime, ExploreDto } from './dto/explore.dto';
-import {
-  AvailableGenres,
-  GenreDetailDto,
-  GenreTabDto,
-} from './dto/genreSearchDto';
+import { ExploreAnime, ExploreResponseDto } from './dto/explore.response.dto';
+import { GenreDetailDto, GenreTabDto } from './dto/genre-search.response.dto';
 import { Quered } from '../jikan/interface/anime-query.interface';
-import { SearchDto } from './dto/search.dto';
+import { SearchResponseDto } from './dto/search.response.dto';
 import { GenreReturn } from '../jikan/interface/genre-return.interface';
+import { AvailableGenres } from './interface/anime-genres.interface';
 
 @Injectable()
 export class AnimeService {
   private jikan: JikanService = new JikanService();
 
-  async getExploreRecomendation(): Promise<ExploreDto[]> {
+  async getExploreRecomendation(): Promise<ExploreResponseDto[]> {
     const exploreData: GenreReturn[] = [];
     for (const genreName of Object.keys(AvailableGenres)) {
       exploreData.push(
@@ -42,10 +39,10 @@ export class AnimeService {
           };
         }) as ExploreAnime[],
       };
-    }) as ExploreDto[];
+    }) as ExploreResponseDto[];
   }
 
-  async getStaffRecomendation(): Promise<StaffRecomendationDto[]> {
+  async getStaffRecomendation(): Promise<StaffRecomendationResponseDto[]> {
     const animes: Season[] = await this.jikan.getSeasonAnime();
 
     return animes.map((anime) => {
@@ -64,10 +61,10 @@ export class AnimeService {
           };
         }),
       };
-    }) as StaffRecomendationDto[];
+    }) as StaffRecomendationResponseDto[];
   }
 
-  async getPopularRecomendation(): Promise<PopularDto[]> {
+  async getPopularRecomendation(): Promise<PopularResponseDto[]> {
     const animes: Tops[] = await this.jikan.getPopularRecomendation(10);
     return animes.map((anime: Tops) => {
       return {
@@ -84,7 +81,7 @@ export class AnimeService {
           };
         }),
       };
-    }) as PopularDto[];
+    }) as PopularResponseDto[];
   }
 
   async getAnimeByGenre(
@@ -114,7 +111,7 @@ export class AnimeService {
     };
   }
 
-  async getAnimeByName(name: string): Promise<SearchDto[]> {
+  async getAnimeByName(name: string): Promise<SearchResponseDto[]> {
     const searchAnime: Quered[] = await this.jikan.getAnimeByName(name);
     return searchAnime.map((anime) => {
       return {
@@ -135,6 +132,6 @@ export class AnimeService {
         type: anime.type == 'TV' ? 'Series' : anime.type,
         season: anime.season,
       };
-    }) as SearchDto[];
+    }) as SearchResponseDto[];
   }
 }

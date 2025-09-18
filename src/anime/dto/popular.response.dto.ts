@@ -1,10 +1,9 @@
-export class StaffRecomendationDto {
+export class PopularResponseDto {
   mal_id: number;
-  image_url: string;
   title: string;
-  year: string;
-  episodes: string;
-  sinopses: string;
+  image_url: string;
+  score: number;
+  status: string;
   genres: IGenres[];
 }
 

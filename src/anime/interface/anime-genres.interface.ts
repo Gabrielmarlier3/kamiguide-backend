@@ -1,6 +1,3 @@
-import { IsEnum, IsIn } from 'class-validator';
-
-//uncomment the line active the category
 export enum AnimeGenreLabel {
   Action = 'Action',
   Adventure = 'Adventure',
@@ -161,26 +158,4 @@ export enum AvailableGenres {
   // Seinen = 'Seinen',
   // Shoujo = 'Shoujo',
   // Shounen = 'Shounen',
-}
-
-export class GenreSearchDto {
-  @IsEnum(AnimeGenreLabel)
-  genre: AnimeGenreLabel;
-  page?: number = 1;
-}
-
-export class GenreTabDto {
-  total: number;
-  animes: GenreDetailDto[];
-}
-
-export interface GenreDetailDto {
-  mal_id: number;
-  title: string;
-  image_url: string;
-  score: number;
-  season: string;
-  status: string;
-  type: string;
-  year: number;
 }
