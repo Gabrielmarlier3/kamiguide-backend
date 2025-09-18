@@ -7,13 +7,14 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { GenreTabDto, AvailableGenres } from './dto/genreSearchDto';
+import { GenreTabDto } from './dto/genre-search.response.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AnimeService } from './anime.service';
-import { StaffRecomendationDto } from './dto/staff-recomendation.dto';
-import { PopularDto } from './dto/popular.dto';
-import { ExploreDto } from './dto/explore.dto';
-import { SearchDto } from './dto/search.dto';
+import { StaffRecomendationResponseDto } from './dto/staff-recomendation.response.dto';
+import { PopularResponseDto } from './dto/popular.response.dto';
+import { ExploreResponseDto } from './dto/explore.response.dto';
+import { SearchResponseDto } from './dto/search.response.dto';
+import { AvailableGenres } from './interface/anime-genres.interface';
 
 @Controller('anime')
 export class AnimeController {
@@ -23,17 +24,17 @@ export class AnimeController {
   @ApiResponse({ status: 201, description: 'Success.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
   @Get('staff-recomendation')
-  async getStaffRecomendation(): Promise<StaffRecomendationDto[]> {
+  async getStaffRecomendation(): Promise<StaffRecomendationResponseDto[]> {
     return await this.animeService.getStaffRecomendation();
   }
 
   @Get('popular')
-  async getPopularRecomendation(): Promise<PopularDto[]> {
+  async getPopularRecomendation(): Promise<PopularResponseDto[]> {
     return await this.animeService.getPopularRecomendation();
   }
 
   @Get('explore')
-  async getExploreRecomendation(): Promise<ExploreDto[]> {
+  async getExploreRecomendation(): Promise<ExploreResponseDto[]> {
     return await this.animeService.getExploreRecomendation();
   }
 
@@ -49,8 +50,10 @@ export class AnimeController {
     return await this.animeService.getAnimeByGenre(genre, page);
   }
 
-  @Post('search')
-  async findAnimeByName(@Body('name') name: string): Promise<SearchDto[]> {
+  @Get('search/:name')
+  async findAnimeByName(
+    @Param('name') name: string,
+  ): Promise<SearchResponseDto[]> {
     return await this.animeService.getAnimeByName(name);
   }
 

@@ -1,10 +1,14 @@
-export class PopularDto {
+export class SearchResponseDto {
   mal_id: number;
   title: string;
-  image_url: string;
-  score: number;
+  year: number;
+  episodes: number;
   status: string;
+  score: number;
+  image_url: string;
   genres: IGenres[];
+  type: string;
+  season: string;
 }
 
 interface IGenres {

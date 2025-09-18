@@ -1,4 +1,4 @@
-export class ExploreDto {
+export class ExploreResponseDto {
   genre: string;
   animes: ExploreAnime[];
 }
