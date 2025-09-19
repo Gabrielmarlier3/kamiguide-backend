@@ -49,7 +49,7 @@ export class AnimeService {
   }
 
   async getStaffRecomendation(): Promise<StaffRecomendationResponseDto[]> {
-    const animes: Season[] = await this.jikan.getSeasonAnime();
+    const animes: Season[] = await this.jikan.getSeasonAnime(3);
 
     return animes.map((anime) => {
       return {
