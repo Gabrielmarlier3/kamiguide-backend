@@ -32,10 +32,11 @@ export class AnimeController implements OnModuleInit {
   @Cron(CronExpression.MONDAY_TO_FRIDAY_AT_1AM)
   async handleCron(): Promise<void> {
     await this.redis.client.flushall();
-    await this.getStaffRecommendation();
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await this.getPopularRecomendation();
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await Promise.all([
+      this.getStaffRecommendation(),
+      this.getPopularRecomendation(),
+    ]);
+    await new Promise((resolve) => setTimeout(resolve, 666));
     await this.getExploreRecommendation();
     this.logger.log('Finished cache refresh via cron job');
   }

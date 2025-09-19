@@ -47,7 +47,7 @@ export class AnimeService {
       const genre = data.animes;
       return {
         genre: genre[0].genres[0].name,
-        image: genre[0].images.jpg.image_url,
+        image: genre[0].images.jpg.large_image_url,
       };
     }) as ExploreResponseDto[];
   }
