@@ -93,12 +93,11 @@ export class AnimeService {
   async getAnimeByGenre(
     genreOptions: AvailableGenres,
     page: number,
-    limit: number,
     year?: number,
   ): Promise<GenreTabDto> {
     const animes: GenreReturn = await this.jikan.getAnimeByGenre({
       genreId: AnimeGenreId[genreOptions as keyof typeof AnimeGenreId],
-      limit: limit,
+      limit: 20,
       page: page,
       year: year,
     });
@@ -123,12 +122,11 @@ export class AnimeService {
   async getAnimeByName(
     name: string,
     page: number,
-    limit: number,
   ): Promise<SearchResponseDto[]> {
     const searchAnime: Quered[] = await this.jikan.getAnimeByName(
       name,
       page,
-      limit,
+      20,
     );
     return searchAnime.map((anime) => {
       return {

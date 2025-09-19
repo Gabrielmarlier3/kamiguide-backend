@@ -18,14 +18,4 @@ export class SearchQueryDto {
   @IsInt({ message: 'Page must be a number' })
   @Min(1, { message: 'Page must be a positive number' })
   page: number = 1;
-
-  @ApiPropertyOptional({
-    example: 20,
-    description: 'Limit of items per page (>= 1, default = 20).',
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt({ message: 'Limit must be a number' })
-  @Min(1, { message: 'Limit must be a positive number' })
-  limit: number = 20;
 }
