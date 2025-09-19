@@ -10,10 +10,15 @@ import { SearchResponseDto } from './dto/response/search.response.dto';
 import { AvailableGenresDto } from './dto/response/available-genre.response.dto';
 import { SearchQueryDto } from './dto/request/search.request.dto';
 import { GetAnimeByGenreDto } from './dto/request/genre-search.request.dto';
+import { RedisService } from '../redis/redis.service';
+import { getOrSet } from '../utils/cache.util';
 
 @Controller('anime')
 export class AnimeController {
-  constructor(private readonly animeService: AnimeService) {}
+  constructor(
+    private readonly animeService: AnimeService,
+    private readonly redis: RedisService,
+  ) {}
 
   @Get('staff-recomendation')
   @ApiOkResponse({
@@ -30,7 +35,11 @@ export class AnimeController {
     },
   })
   async getStaffRecomendation(): Promise<StaffRecomendationResponseDto[]> {
-    return await this.animeService.getStaffRecomendation();
+    const key = 'app:home:v1:stf_recommendation';
+    const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
+    return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
+      this.animeService.getStaffRecomendation(),
+    );
   }
 
   @Get('popular')
@@ -48,7 +57,11 @@ export class AnimeController {
     },
   })
   async getPopularRecomendation(): Promise<PopularResponseDto[]> {
-    return await this.animeService.getPopularRecomendation();
+    const key = 'app:home:v1:popular_recommendation';
+    const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
+    return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
+      this.animeService.getPopularRecomendation(),
+    );
   }
 
   @Get('explore')
@@ -66,7 +79,11 @@ export class AnimeController {
     },
   })
   async getExploreRecomendation(): Promise<ExploreResponseDto[]> {
-    return await this.animeService.getExploreRecomendation();
+    const key = 'app:home:v1:explore_recommendation';
+    const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
+    return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
+      this.animeService.getExploreRecomendation(),
+    );
   }
 
   @Get('explore/genre')
@@ -84,11 +101,10 @@ export class AnimeController {
     },
   })
   async getAnimeByGender(@Query() q: GetAnimeByGenreDto): Promise<GenreTabDto> {
-    return await this.animeService.getAnimeByGenre(
-      q.genre,
-      q.page,
-      q.limit,
-      q.year,
+    const key = `app:explore:v1:genre:${q.genre}:page:${q.page}:year:${q.year}`;
+    const TTL_1_DAY = 60 * 60 * 24; // 1 day in seconds
+    return await getOrSet(this.redis.client, key, TTL_1_DAY, () =>
+      this.animeService.getAnimeByGenre(q.genre, q.page, q.year),
     );
   }
 
@@ -109,7 +125,11 @@ export class AnimeController {
   async findAnimeByName(
     @Query() q: SearchQueryDto,
   ): Promise<SearchResponseDto[]> {
-    return await this.animeService.getAnimeByName(q.name, q.page, q.limit);
+    const key = `app:search:v1:name:${q.name}:page:${q.page}}`;
+    const TTL_1_HOUR = 60 * 60; // 1 hour in seconds
+    return await getOrSet(this.redis.client, key, TTL_1_HOUR, () =>
+      this.animeService.getAnimeByName(q.name, q.page),
+    );
   }
 
   @Get('available-genres')

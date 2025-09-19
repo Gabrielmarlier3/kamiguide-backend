@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { LibraryModule } from './library/library.module';
 import { JikanModule } from './jikan/jikan.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { JikanModule } from './jikan/jikan.module';
     CalendarModule,
     LibraryModule,
     JikanModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
