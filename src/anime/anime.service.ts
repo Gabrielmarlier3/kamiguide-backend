@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JikanService } from '../jikan/jikan.service';
 import { Season } from '../jikan/interface/season-now.interface';
 import { AnimeGenreId } from '../jikan/interface/genre-sorted.interface';
@@ -6,10 +6,7 @@ import { Tops } from '../jikan/interface/popular-anime.interface';
 import { Quered } from '../jikan/interface/anime-query.interface';
 import { GenreReturn } from '../jikan/interface/genre-return.interface';
 import { AvailableGenres } from './interface/anime-genres.interface';
-import {
-  ExploreAnimeDto,
-  ExploreResponseDto,
-} from './dto/response/explore.response.dto';
+import { ExploreResponseDto } from './dto/response/explore.response.dto';
 import { StaffRecomendationResponseDto } from './dto/response/staff-recomendation.response.dto';
 import { PopularResponseDto } from './dto/response/popular.response.dto';
 import {
@@ -21,34 +18,42 @@ import { SearchResponseDto } from './dto/response/search.response.dto';
 @Injectable()
 export class AnimeService {
   private jikan: JikanService = new JikanService();
+  private logger = new Logger(this.constructor.name);
 
   async getExploreRecomendation(): Promise<ExploreResponseDto[]> {
+    this.logger.log('Fetching explore recommendation data...');
     const exploreData: GenreReturn[] = [];
     for (const genreName of Object.keys(AvailableGenres)) {
-      exploreData.push(
-        await this.jikan.getAnimeByGenre({
-          limit: 5,
+      for (let i = 0; i < 2; i++) {
+        this.logger.log(
+          `Trying to fetch genre: ${genreName}, attempt ${i + 1}`,
+        );
+        const data = await this.jikan.getAnimeByGenre({
+          limit: 1,
           genreId: AnimeGenreId[genreName as keyof typeof AnimeGenreId],
-        }),
-      );
+        });
+        if (data.length > 0) {
+          exploreData.push(data);
+          break;
+        }
+        this.logger.warn(
+          `Attempt ${i + 1} failed for genre: ${genreName}. Retrying...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      await new Promise((resolve) => setTimeout(resolve, 333));
     }
     return exploreData.map((data) => {
       const genre = data.animes;
       return {
-        genre: genre[0].name,
-        animes: genre.map((anime) => {
-          return {
-            mal_id: anime.mal_id,
-            title: anime.title,
-            image_url: anime.images.jpg.large_image_url,
-            score: anime.score,
-          };
-        }) as ExploreAnimeDto[],
+        genre: genre[0].genres[0].name,
+        image: genre[0].images.jpg.image_url,
       };
     }) as ExploreResponseDto[];
   }
 
   async getStaffRecomendation(): Promise<StaffRecomendationResponseDto[]> {
+    this.logger.log('Fetching staff recommendation data...');
     const animes: Season[] = await this.jikan.getSeasonAnime(3);
 
     return animes.map((anime) => {
@@ -71,6 +76,7 @@ export class AnimeService {
   }
 
   async getPopularRecomendation(): Promise<PopularResponseDto[]> {
+    this.logger.log('Fetching popular recommendation data...');
     const animes: Tops[] = await this.jikan.getPopularRecomendation(10);
     return animes.map((anime: Tops) => {
       return {
@@ -95,6 +101,9 @@ export class AnimeService {
     page: number,
     year?: number,
   ): Promise<GenreTabDto> {
+    this.logger.log(
+      `Fetching anime by genre: ${genreOptions}, page: ${page}, year: ${year}`,
+    );
     const animes: GenreReturn = await this.jikan.getAnimeByGenre({
       genreId: AnimeGenreId[genreOptions as keyof typeof AnimeGenreId],
       limit: 20,
@@ -123,6 +132,7 @@ export class AnimeService {
     name: string,
     page: number,
   ): Promise<SearchResponseDto[]> {
+    this.logger.log(`Searching anime by name: ${name}, page: ${page}`);
     const searchAnime: Quered[] = await this.jikan.getAnimeByName(
       name,
       page,

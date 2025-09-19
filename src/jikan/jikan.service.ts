@@ -114,8 +114,11 @@ export class JikanService {
         animes: response.data.data,
       };
     } catch (error: any) {
+      if (axios.isAxiosError(error) && error?.response?.status === 429) {
+        return { length: 0, animes: [] };
+      }
       this.logger.error(
-        `[getAnimeByGenre] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Error while fetching anime by genre with filter: ${JSON.stringify(filter)} - ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
       if (error instanceof HttpException) {
         throw error;
