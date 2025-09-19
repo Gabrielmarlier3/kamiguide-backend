@@ -24,15 +24,8 @@ export class JikanService {
     });
   }
 
-  async getSeasonAnime(limit: number = 3): Promise<Season[]> {
+  async getSeasonAnime(limit: number): Promise<Season[]> {
     try {
-      if (isNaN(limit)) {
-        throw new HttpException(
-          'Limit must be a number',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       const response: AxiosResponse<ISeasonNow> = await axios.get(
         `${this.base_url}/seasons/now?limit=${limit}`,
         {
@@ -64,15 +57,8 @@ export class JikanService {
     }
   }
 
-  async getPopularRecomendation(limit: number = 10): Promise<Tops[]> {
+  async getPopularRecomendation(limit: number): Promise<Tops[]> {
     try {
-      if (isNaN(limit)) {
-        throw new HttpException(
-          'Limit must be a number',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       const response: AxiosResponse<IPopularAnime> = await axios.get(
         `${this.base_url}/top/anime?limit=${limit}`,
         {
@@ -180,13 +166,6 @@ export class JikanService {
 
   async getAnimeDetailsById(id: number): Promise<AnimeDetails> {
     try {
-      if (isNaN(id) || id <= 0) {
-        throw new HttpException(
-          'Id must be a positive number',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       const response: AxiosResponse<IFullAnime> = await axios.get(
         `${this.base_url}/anime/${id}/full`,
         {
@@ -220,13 +199,6 @@ export class JikanService {
 
   async getSimilarAnime(id: number): Promise<Quered[]> {
     try {
-      if (isNaN(id) || id <= 0) {
-        throw new HttpException(
-          'Id must be a positive number',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       const response: AxiosResponse<IAnimeQuery> = await axios.get(
         `${this.base_url}/anime/${id}/recommendations`,
         {
