@@ -106,19 +106,6 @@ export class JikanService {
 
   async getAnimeByGenre(filter: IGenreAnimeFilter): Promise<GenreReturn> {
     try {
-      if (isNaN(Number(filter.limit))) {
-        throw new HttpException(
-          'Limit must be a number',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      if (filter.page && isNaN(Number(filter.page))) {
-        throw new HttpException(
-          'Page must be a number',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       let url = `${this.base_url}/anime?genres=${filter.genreId}&order_by=${filter.order_by ?? 'score'}&sort=${filter.sort ?? 'desc'}&limit=${filter.limit ?? '12'}&sfw=true&page=${filter.page ?? 1}`;
       if (filter.year) {
         url += `&start_date=${filter.year}-01-01&end_date=${filter.year}-12-31`;
@@ -132,7 +119,7 @@ export class JikanService {
 
       if (!response.data) {
         throw new HttpException(
-          'Error fetching explore anime recommendation',
+          'Error fetching anime by genre',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
@@ -148,26 +135,20 @@ export class JikanService {
         throw error;
       }
       throw new HttpException(
-        'Error fetching season anime',
+        'Error fetching anime by genre',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  async getAnimeByName(name: string, page: number = 1): Promise<Quered[]> {
+  async getAnimeByName(
+    name: string,
+    page: number,
+    limit: number,
+  ): Promise<Quered[]> {
     try {
-      if (!name?.trim()) {
-        throw new HttpException('Name is required', HttpStatus.BAD_REQUEST);
-      }
-      if (isNaN(page) || page < 1) {
-        throw new HttpException(
-          'Page must be a positive number',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       const response: AxiosResponse<IAnimeQuery> = await axios.get(
-        `${this.base_url}/anime?q=${encodeURIComponent(name)}&sfw=true&page=${page}`,
+        `${this.base_url}/anime?q=${encodeURIComponent(name)}&sfw=true&page=${page}&limit=${limit}`,
         {
           headers: { accept: 'application/json' },
           timeout: 60_000,
@@ -191,7 +172,7 @@ export class JikanService {
         throw error;
       }
       throw new HttpException(
-        'Error fetching season anime',
+        'Error fetching anime by name',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { ServerStatusDto } from './app.controller';
 
 @Injectable()
 export class AppService {
-  healthy() {
+  healthy(): ServerStatusDto {
     return {
       status: 'ok',
       message: 'API is running',

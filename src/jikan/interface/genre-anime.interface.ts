@@ -19,5 +19,5 @@ export interface IGenreAnimeFilter {
   order_by?: OrderBy;
   sort?: 'desc' | 'asc';
   limit?: number;
-  year?: string;
+  year?: number;
 }

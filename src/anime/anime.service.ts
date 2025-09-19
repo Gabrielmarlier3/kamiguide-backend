@@ -2,15 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { JikanService } from '../jikan/jikan.service';
 import { Season } from '../jikan/interface/season-now.interface';
 import { AnimeGenreId } from '../jikan/interface/genre-sorted.interface';
-import { StaffRecomendationResponseDto } from './dto/staff-recomendation.response.dto';
-import { PopularResponseDto } from './dto/popular.response.dto';
 import { Tops } from '../jikan/interface/popular-anime.interface';
-import { ExploreAnime, ExploreResponseDto } from './dto/explore.response.dto';
-import { GenreDetailDto, GenreTabDto } from './dto/genre-search.response.dto';
 import { Quered } from '../jikan/interface/anime-query.interface';
-import { SearchResponseDto } from './dto/search.response.dto';
 import { GenreReturn } from '../jikan/interface/genre-return.interface';
 import { AvailableGenres } from './interface/anime-genres.interface';
+import {
+  ExploreAnimeDto,
+  ExploreResponseDto,
+} from './dto/response/explore.response.dto';
+import { StaffRecomendationResponseDto } from './dto/response/staff-recomendation.response.dto';
+import { PopularResponseDto } from './dto/response/popular.response.dto';
+import {
+  GenreDetailDto,
+  GenreTabDto,
+} from './dto/response/genre-search.response.dto';
+import { SearchResponseDto } from './dto/response/search.response.dto';
 
 @Injectable()
 export class AnimeService {
@@ -37,7 +43,7 @@ export class AnimeService {
             image_url: anime.images.jpg.large_image_url,
             score: anime.score,
           };
-        }) as ExploreAnime[],
+        }) as ExploreAnimeDto[],
       };
     }) as ExploreResponseDto[];
   }
@@ -87,11 +93,14 @@ export class AnimeService {
   async getAnimeByGenre(
     genreOptions: AvailableGenres,
     page: number,
+    limit: number,
+    year?: number,
   ): Promise<GenreTabDto> {
     const animes: GenreReturn = await this.jikan.getAnimeByGenre({
       genreId: AnimeGenreId[genreOptions as keyof typeof AnimeGenreId],
-      limit: 20,
+      limit: limit,
       page: page,
+      year: year,
     });
 
     return {
@@ -111,8 +120,16 @@ export class AnimeService {
     };
   }
 
-  async getAnimeByName(name: string): Promise<SearchResponseDto[]> {
-    const searchAnime: Quered[] = await this.jikan.getAnimeByName(name);
+  async getAnimeByName(
+    name: string,
+    page: number,
+    limit: number,
+  ): Promise<SearchResponseDto[]> {
+    const searchAnime: Quered[] = await this.jikan.getAnimeByName(
+      name,
+      page,
+      limit,
+    );
     return searchAnime.map((anime) => {
       return {
         mal_id: anime.mal_id,
