@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, OnModuleInit, Logger } from '@nestjs/common';
 import { ApiInternalServerErrorResponse, ApiOkResponse } from '@nestjs/swagger';
 import { AnimeService } from './anime.service';
 import { AvailableGenres } from './interface/anime-genres.interface';
@@ -12,13 +12,33 @@ import { SearchQueryDto } from './dto/request/search.request.dto';
 import { GetAnimeByGenreDto } from './dto/request/genre-search.request.dto';
 import { RedisService } from '../redis/redis.service';
 import { getOrSet } from '../utils/cache.util';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Controller('anime')
-export class AnimeController {
+export class AnimeController implements OnModuleInit {
+  private readonly logger: Logger = new Logger(AnimeController.name);
+
   constructor(
     private readonly animeService: AnimeService,
     private readonly redis: RedisService,
   ) {}
+
+  onModuleInit() {
+    if (process.env.NODE_ENV === 'production') {
+      void this.handleCron();
+    }
+  }
+
+  @Cron(CronExpression.MONDAY_TO_FRIDAY_AT_1AM)
+  async handleCron(): Promise<void> {
+    await this.redis.client.flushall();
+    await this.getStaffRecommendation();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await this.getPopularRecomendation();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await this.getExploreRecommendation();
+    this.logger.log('Finished cache refresh via cron job');
+  }
 
   @Get('staff-recomendation')
   @ApiOkResponse({
@@ -34,7 +54,7 @@ export class AnimeController {
       },
     },
   })
-  async getStaffRecomendation(): Promise<StaffRecomendationResponseDto[]> {
+  async getStaffRecommendation(): Promise<StaffRecomendationResponseDto[]> {
     const key = 'app:home:v1:stf_recommendation';
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
@@ -78,7 +98,7 @@ export class AnimeController {
       },
     },
   })
-  async getExploreRecomendation(): Promise<ExploreResponseDto[]> {
+  async getExploreRecommendation(): Promise<ExploreResponseDto[]> {
     const key = 'app:home:v1:explore_recommendation';
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
