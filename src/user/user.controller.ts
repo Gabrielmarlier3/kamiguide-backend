@@ -1,22 +1,12 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpException,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { FirebaseService } from '../firebase/firebase.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { IdToken } from '../auth/id-token.decorator';
 import { AuthGuard } from '../auth/auth.guard';
 import { GenerateTokenDto } from './dto/generateToken.dto';
-import { cacheGet, cacheSet } from '../utils/cache.util';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { RedisService } from '../redis/redis.service';
 
 @Controller('user')
 export class UserController {
