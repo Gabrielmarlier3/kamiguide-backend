@@ -7,7 +7,7 @@ import { FirebaseService } from './firebase.service';
 
 @Global()
 @Module({
-  providers: [FirebaseService]
+  providers: [FirebaseService],
 })
 export class FirebaseModule {
   static forRoot(): DynamicModule {
@@ -47,8 +47,8 @@ export class FirebaseModule {
 
     return {
       module: FirebaseModule,
-      providers: [firebaseConfigProvider, firebaseProvider],
-      exports: [firebaseConfigProvider, firebaseProvider],
+      providers: [firebaseConfigProvider, firebaseProvider, FirebaseService],
+      exports: [firebaseConfigProvider, firebaseProvider, FirebaseService],
     };
   }
 }

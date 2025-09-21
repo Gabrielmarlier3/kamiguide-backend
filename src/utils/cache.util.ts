@@ -33,3 +33,22 @@ export async function getOrSet<T>(
     await redis.del(lockKey).catch(() => {});
   }
 }
+
+// Salvar direto
+export async function cacheSet(
+  redis: Redis,
+  key: string,
+  ttlSec: number,
+  value: any,
+): Promise<void> {
+  await redis.set(key, JSON.stringify(value), 'EX', ttlSec);
+}
+
+// Pegar direto
+export async function cacheGet<T>(
+  redis: Redis,
+  key: string,
+): Promise<T | null> {
+  const hit = await redis.get(key);
+  return hit ? (JSON.parse(hit) as T) : null;
+}

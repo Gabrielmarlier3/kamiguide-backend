@@ -11,6 +11,7 @@ import { DatabaseModule } from './database/database.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ConfigModule } from '@nestjs/config';
     DatabaseModule,
     FirebaseModule.forRoot(),
     AuthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
