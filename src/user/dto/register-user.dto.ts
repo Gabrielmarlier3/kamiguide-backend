@@ -7,10 +7,14 @@ export class RegisterUserDto {
   @IsString()
   firstName!: string;
 
-  @ApiProperty({ example: 'Souza', description: "The user's last name" })
+  @ApiProperty({
+    example: '12345',
+    description:
+      'Five-digit verification code sent to the user’s email for create account',
+  })
   @IsNotEmpty()
   @IsString()
-  lastName!: string;
+  token!: string;
 
   @ApiProperty({
     example: 'gabrielmarliere2005@gmail.com',

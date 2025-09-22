@@ -13,7 +13,7 @@ export class ChangePasswordDto {
   @ApiProperty({
     example: '182469',
     description:
-      'Six-digit verification code sent to the user’s email for password reset',
+      'Five-digit verification code sent to the user’s email for password reset',
   })
   @IsNotEmpty()
   @IsString()

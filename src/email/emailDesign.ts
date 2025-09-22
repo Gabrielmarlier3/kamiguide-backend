@@ -1,4 +1,8 @@
-export function emailDesing(userName: string, recoveryKey: string): string {
+export function emailDesign(
+  userName: string,
+  key: string,
+  recovery: boolean,
+): string {
   return ` <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -176,12 +180,16 @@ export function emailDesing(userName: string, recoveryKey: string): string {
     <div class="greeting">Hello, ${userName}!</div>
 
     <div class="message">
-      We received a request to authenticate your KamiGuide account. Here is your verification code to complete the process:
-    </div>
+      ${
+    recovery
+      ? 'We received a request to reset your KamiGuide password. If you made this request, use the verification code below.'
+      : 'To complete your registration, please verify your email address by entering the code below. If you did not try to create a KamiGuide account, you can safely ignore this email.'
+  }
+   </div>
 
     <div class="code-container">
       <div class="code-label">Authentication Code</div>
-      <div class="auth-code">${recoveryKey}</div>
+      <div class="auth-code">${key}</div>
       <div class="code-note">This code expires in 10 minutes</div>
     </div>
 
@@ -192,9 +200,9 @@ export function emailDesing(userName: string, recoveryKey: string): string {
     </div>
 
     <div class="footer-message">
-      This code was generated for your account security. If you're having trouble accessing your account or didn't request this code, please contact our support team.
+      This code was generated for your security. If you're having trouble accessing your account or didn't request this code, please contact our support team.
       <br><br>
-      Thank you for being part of the KamiGuide community!
+      ${recovery ? 'Thank you for being part of the KamiGuide community!' : 'Cheerfully, <br>The KamiGuide Team'}
     </div>
   </div>
 

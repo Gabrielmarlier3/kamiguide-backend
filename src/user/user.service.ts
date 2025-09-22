@@ -16,6 +16,23 @@ export class UserService {
   ) {}
 
   async registerUser(registerUser: RegisterUserDto): Promise<UserRecord> {
+    const attemptKey = `app:verification:attempts:${registerUser.email}`;
+    const attempts: string | null = await cacheGet(
+      this.redis.client,
+      attemptKey,
+    );
+    const newAttempts = attempts ? parseInt(attempts) + 1 : 1;
+    await cacheSet(this.redis.client, attemptKey, 600, newAttempts.toString());
+    if (attempts && parseInt(attempts) >= 5) {
+      throw new HttpException('Too many attempts, please try again later', 429);
+    }
+    const token = await cacheGet(
+      this.redis.client,
+      `app:verification:token:${registerUser.email}`,
+    );
+    if (token !== registerUser.token) {
+      throw new HttpException('Invalid token', 400);
+    }
     return this.firebaseService.createUser({
       displayName: registerUser.firstName,
       email: registerUser.email,
@@ -26,14 +43,14 @@ export class UserService {
   async changePassword(dto: ChangePasswordDto): Promise<void> {
     const key = `app:recovery:attempts:${dto.email}`;
     const attempts: string | null = await cacheGet(this.redis.client, key);
+    const newAttempts = attempts ? parseInt(attempts) + 1 : 1;
+    await cacheSet(this.redis.client, key, 600, newAttempts.toString());
     if (attempts && parseInt(attempts) >= 5) {
       throw new HttpException(
         'Too many attempts, please request a new token',
         429,
       );
     }
-    const newAttempts = attempts ? parseInt(attempts) + 1 : 1;
-    await cacheSet(this.redis.client, key, 600, newAttempts.toString());
     const token = await cacheGet(
       this.redis.client,
       `app:recovery:token:${dto.email}`,
@@ -45,9 +62,10 @@ export class UserService {
   }
 
   async sendRefactorCodeMail(email: string): Promise<void> {
-    const user = await this.firebaseService.getUserByEmail(email);
-    if (user) {
-      await this.emailService.sendRefactorCodeMail(user.email!);
-    }
+    await this.emailService.sendCodeToEmail(email, true);
+  }
+
+  async sendVerificationCode(email: string): Promise<void> {
+    await this.emailService.sendCodeToEmail(email, false);
   }
 }

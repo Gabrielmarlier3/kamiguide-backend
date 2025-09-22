@@ -26,10 +26,16 @@ export class UserController {
     return { message: 'Password changed successfully' };
   }
 
-  @Post('token')
+  @Post('refactor-token')
   async createToken(@Body() dto: GenerateTokenDto) {
     await this.userService.sendRefactorCodeMail(dto.email);
     return { message: 'If the email is registered, a code has been sent' };
+  }
+
+  @Post('verification-token')
+  async createVerificationToken(@Body() dto: GenerateTokenDto) {
+    await this.userService.sendVerificationCode(dto.email);
+    return { message: 'Verification code sent to your email' };
   }
 
   @Get('profile')
