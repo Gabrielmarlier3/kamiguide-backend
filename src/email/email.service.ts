@@ -73,7 +73,7 @@ export class EmailService {
         }
       } catch (error) {
         this.logger.error('Error sending email', error);
-        throw new HttpException('Error sending code', 500);
+        throw new HttpException('Error sending code.', 500);
       }
     }
   }
