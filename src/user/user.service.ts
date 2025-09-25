@@ -24,7 +24,10 @@ export class UserService {
     const newAttempts = attempts ? parseInt(attempts) + 1 : 1;
     await cacheSet(this.redis.client, attemptKey, 600, newAttempts.toString());
     if (attempts && parseInt(attempts) >= 5) {
-      throw new HttpException('Too many attempts, please try again later', 429);
+      throw new HttpException(
+        'Too many attempts, please request a new token.',
+        429,
+      );
     }
     const token = await cacheGet(
       this.redis.client,
@@ -47,7 +50,7 @@ export class UserService {
     await cacheSet(this.redis.client, key, 600, newAttempts.toString());
     if (attempts && parseInt(attempts) >= 5) {
       throw new HttpException(
-        'Too many attempts, please request a new token',
+        'Too many attempts, please request a new token.',
         429,
       );
     }

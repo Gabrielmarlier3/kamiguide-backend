@@ -9,6 +9,8 @@ import axios, { AxiosResponse } from 'axios';
 import * as dns from 'node:dns';
 import { IGenreAnimeFilter } from './interface/genre-anime.interface';
 import { GenreReturn } from './interface/genre-return.interface';
+import { IScheculeInterface, Schedule } from './interface/schedule.interface';
+import { ScheduleFilter } from './interface/scheduleFilter.interface';
 
 @Injectable()
 export class JikanService {
@@ -228,6 +230,38 @@ export class JikanService {
       }
       throw new HttpException(
         'Error fetching season anime',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getSchedule(filter: ScheduleFilter): Promise<Schedule[]> {
+    try {
+      const url = `${this.base_url}/schedules?sfw=true&limit=20${filter.day ? `&filter=${filter.day}` : ''}${filter.page ? `&page=${filter.page}` : ''}`;
+      const response: AxiosResponse<IScheculeInterface> = await axios.get(url, {
+        headers: { accept: 'application/json' },
+        timeout: 60_000,
+        httpsAgent: this.agent,
+      });
+      if (!response.data) {
+        throw new HttpException(
+          'Error fetching schedule anime',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      return response.data.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error?.response?.status === 429) {
+        return [];
+      }
+      this.logger.error(
+        `[getSchedule] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        'Error fetching schedule anime',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
