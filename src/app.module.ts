@@ -12,7 +12,6 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { EmailModule } from './email/email.module';
-import { SequelizeModule } from '@nestjs/sequelize';
 
 @Module({
   imports: [
@@ -27,18 +26,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
     FirebaseModule.forRoot(),
     AuthModule,
     EmailModule,
-    SequelizeModule.forRoot({
-      dialect: 'postgres',
-      host: process.env.POSTGRES_HOST || 'localhost',
-      port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
-      username: process.env.POSTGRES_USER || 'admin',
-      password: process.env.POSTGRES_PASSWORD || 'secretpassword',
-      database: process.env.POSTGRES_DB || 'mydatabase',
-      autoLoadModels: true,
-      synchronize: true,
-      models: [],
-      logging: false,
-    }),
   ],
   controllers: [AppController],
   providers: [AppService],

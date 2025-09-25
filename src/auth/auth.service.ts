@@ -11,4 +11,14 @@ export class AuthService {
       await this.firebaseService.singInWithEmailAndPassword(email, password);
     return { idToken, refreshToken, expiresIn };
   }
+
+  async refresh(refreshToken: string) {
+    const { id_token, refresh_token, expires_in } =
+      await this.firebaseService.refreshIdToken(refreshToken);
+    return {
+      idToken: id_token,
+      refreshToken: refresh_token,
+      expiresIn: expires_in,
+    };
+  }
 }

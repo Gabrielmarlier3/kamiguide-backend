@@ -6,6 +6,8 @@ import UserRecord = auth.UserRecord;
 import { FirebaseConfigService } from './firebase-config.service';
 import axios from 'axios';
 import { DecodedIdToken } from 'firebase-admin/lib/auth';
+import { FirebaseSignInResponse } from './interface/firebaseSignInResponse.interface';
+import { FirebaseRefreshTokenResponse } from './interface/firebaseRefreshToken.interface';
 
 @Injectable()
 export class FirebaseService {
@@ -57,7 +59,22 @@ export class FirebaseService {
       .catch((error): never => this.handleFirebaseAuthError(error));
   }
 
-  async singInWithEmailAndPassword(email: string, password: string) {
+  async refreshIdToken(
+    refreshToken: string,
+  ): Promise<FirebaseRefreshTokenResponse> {
+    const url = `https://securetoken.googleapis.com/v1/token?key=${this.apiKey}`;
+    return await this.sendPostRequest(url, {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    }).catch((error) => {
+      this.handleRestApiError(error);
+    });
+  }
+
+  async singInWithEmailAndPassword(
+    email: string,
+    password: string,
+  ): Promise<FirebaseSignInResponse> {
     const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${this.apiKey}`;
     return await this.sendPostRequest(url, {
       email,
