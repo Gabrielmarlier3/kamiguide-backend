@@ -1,10 +1,12 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { CalendarRequestDto } from './dto/request/calendar.request.dto';
 import { CalendarService } from './calendar.service';
 import { getOrSet } from '../utils/cache.util';
 import { RedisService } from '../redis/redis.service';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { CalendarResponseDto } from './dto/response/calendar.response.dto';
+import { AuthGuard } from '../auth/auth.guard';
+import { UserUid } from '../decorator/user-uid.decorator';
 
 @Controller('calendar')
 export class CalendarController {
@@ -27,5 +29,18 @@ export class CalendarController {
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
       this.calendarService.getCalendar(dto),
     );
+  }
+
+  @Get('user')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description: 'Get user calendar.',
+    type: [CalendarResponseDto],
+  })
+  async getUserCalendar(
+    @UserUid() userUid: string,
+  ): Promise<CalendarResponseDto[]> {
+    return this.calendarService.getUserCalendar(userUid);
   }
 }
