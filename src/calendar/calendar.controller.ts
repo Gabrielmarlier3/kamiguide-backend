@@ -1,12 +1,13 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { CalendarRequestDto } from './dto/request/calendar.request.dto';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { GetUserCalendarRequestDto } from './dto/request/getUserCalendar.request.dto';
 import { CalendarService } from './calendar.service';
 import { getOrSet } from '../utils/cache.util';
 import { RedisService } from '../redis/redis.service';
-import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
-import { CalendarResponseDto } from './dto/response/calendar.response.dto';
+import { ApiBearerAuth, ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { GetUserCalendarResponseDto } from './dto/response/getUserCalendar.response.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserUid } from '../decorator/user-uid.decorator';
+import { AddUserCalendarDto } from './dto/request/addUserCalendar.request';
 
 @Controller('calendar')
 export class CalendarController {
@@ -18,11 +19,11 @@ export class CalendarController {
   @Get()
   @ApiOkResponse({
     description: 'Get staff recomendation.',
-    type: [CalendarResponseDto],
+    type: [GetUserCalendarResponseDto],
   })
   async getAiring(
-    @Query() dto: CalendarRequestDto,
-  ): Promise<CalendarResponseDto[]> {
+    @Query() dto: GetUserCalendarRequestDto,
+  ): Promise<GetUserCalendarResponseDto[]> {
     const key = `app:calendar:v1:${dto.day}:${dto.page}`;
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
 
@@ -36,11 +37,26 @@ export class CalendarController {
   @ApiBearerAuth()
   @ApiOkResponse({
     description: 'Get user calendar.',
-    type: [CalendarResponseDto],
+    type: [GetUserCalendarResponseDto],
   })
   async getUserCalendar(
     @UserUid() userUid: string,
-  ): Promise<CalendarResponseDto[]> {
+  ): Promise<GetUserCalendarResponseDto[]> {
     return this.calendarService.getUserCalendar(userUid);
+  }
+
+  @Post('user')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiBody({ type: AddUserCalendarDto })
+  @ApiOkResponse({
+    description: 'Add an anime to user calendar and return updated list.',
+    type: [GetUserCalendarResponseDto],
+  })
+  async addAnimeToUserCalendar(
+    @UserUid() userUid: string,
+    @Body() dto: AddUserCalendarDto,
+  ): Promise<GetUserCalendarResponseDto[]> {
+    return this.calendarService.addToUserCalendar(userUid, dto);
   }
 }

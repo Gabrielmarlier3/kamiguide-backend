@@ -1,46 +1,51 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
-@Table({ tableName: 'library', timestamps: true })
+@Table({
+  tableName: 'library',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+})
 export class LibraryModel extends Model<LibraryModel> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  user_uid: string;
+  declare user_uid: string;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  mal_id: number;
+  declare mal_id: number;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  title: string;
+  declare title: string;
 
   @Column({
     type: DataType.ENUM('movie', 'series'),
     allowNull: false,
   })
-  media_type: 'movie' | 'series';
+  declare media_type: 'movie' | 'series';
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  season: string;
+  declare season: string;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
   })
-  year: number;
+  declare year: number;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  status: string;
+  declare status: string;
 }

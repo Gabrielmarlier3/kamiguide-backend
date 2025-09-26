@@ -65,6 +65,11 @@ module.exports = {
         defaultValue: Sequelize.fn('NOW'),
       },
     });
+    await queryInterface.addConstraint('schedule', {
+      fields: ['user_uid', 'mal_id'],
+      type: 'unique',
+      name: 'unique_user_anime'
+    });
   },
 
   async down(queryInterface, Sequelize) {

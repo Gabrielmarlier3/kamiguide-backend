@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DayFilter } from '../../../jikan/interface/scheduleFilter.interface';
 
-export class CalendarResponseDto {
+export class GetUserCalendarResponseDto {
   @ApiProperty({
     example: 5114,
     description: 'MyAnimeList ID of the anime',

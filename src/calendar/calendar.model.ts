@@ -1,18 +1,21 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { InferAttributes, InferCreationAttributes } from 'sequelize';
 
-@Table({ tableName: 'schedule', timestamps: true })
-export class CalendarModel extends Model<CalendarModel> {
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
-  user_uid: string;
+@Table({
+  tableName: 'schedule',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+})
+export class CalendarModel extends Model<
+  InferAttributes<CalendarModel>,
+  InferCreationAttributes<CalendarModel>
+> {
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare user_uid: string;
 
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  mal_id: number;
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  declare mal_id: number;
 
   @Column({
     type: DataType.ENUM(
@@ -26,29 +29,17 @@ export class CalendarModel extends Model<CalendarModel> {
     ),
     allowNull: false,
   })
-  day: string;
+  declare day: string;
 
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
-  title: string;
+  @Column({ type: DataType.STRING, allowNull: false })
+  declare title: string;
 
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
-  release_time: string;
+  @Column({ type: DataType.STRING, allowNull: true })
+  declare release_time: string | null;
 
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: true,
-  })
-  episode_count: number;
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  declare episode_count: number | null;
 
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
-  image_url: string;
+  @Column({ type: DataType.STRING, allowNull: true })
+  declare image_url: string | null;
 }

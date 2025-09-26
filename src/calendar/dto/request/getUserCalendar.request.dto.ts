@@ -10,7 +10,7 @@ import { DayFilter } from '../../../jikan/interface/scheduleFilter.interface';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-export class CalendarRequestDto {
+export class GetUserCalendarRequestDto {
   @ApiProperty({
     description: 'Day of the week filter',
     enum: DayFilter,
