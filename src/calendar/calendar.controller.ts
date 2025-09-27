@@ -15,7 +15,8 @@ import { RedisService } from '../redis/redis.service';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiBody, ApiConflictResponse,
+  ApiBody,
+  ApiConflictResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
