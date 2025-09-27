@@ -9,7 +9,7 @@ import axios, { AxiosResponse } from 'axios';
 import * as dns from 'node:dns';
 import { IGenreAnimeFilter } from './interface/genre-anime.interface';
 import { GenreReturn } from './interface/genre-return.interface';
-import { IScheculeInterface, Schedule } from './interface/schedule.interface';
+import { IScheculeInterface } from './interface/schedule.interface';
 import { ScheduleFilter } from './interface/scheduleFilter.interface';
 
 @Injectable()
@@ -94,11 +94,21 @@ export class JikanService {
 
   async getAnimeByGenre(filter: IGenreAnimeFilter): Promise<GenreReturn> {
     try {
-      let url = `${this.base_url}/anime?genres=${filter.genreId}&order_by=${filter.order_by ?? 'score'}&sort=${filter.sort ?? 'desc'}&limit=${filter.limit ?? '12'}&sfw=true&page=${filter.page ?? 1}`;
+      const params = new URLSearchParams({
+        genres: filter.genreId.toString(),
+        order_by: filter.order_by ?? 'score',
+        sort: filter.sort ?? 'desc',
+        limit: (filter.limit ?? 12).toString(),
+        sfw: 'true',
+        page: (filter.page ?? 1).toString(),
+      });
+
       if (filter.year) {
-        url += `&start_date=${filter.year}-01-01&end_date=${filter.year}-12-31`;
+        params.append('start_date', `${filter.year}-01-01`);
+        params.append('end_date', `${filter.year}-12-31`);
       }
 
+      const url = `${this.base_url}/anime?${params.toString()}`;
       const response: AxiosResponse<IGenreSorted> = await axios.get(url, {
         headers: { accept: 'application/json' },
         timeout: 60_000,
@@ -138,14 +148,20 @@ export class JikanService {
     limit: number,
   ): Promise<Quered[]> {
     try {
-      const response: AxiosResponse<IAnimeQuery> = await axios.get(
-        `${this.base_url}/anime?q=${encodeURIComponent(name)}&sfw=true&page=${page}&limit=${limit}`,
-        {
-          headers: { accept: 'application/json' },
-          timeout: 60_000,
-          httpsAgent: this.agent,
-        },
-      );
+      const params = new URLSearchParams({
+        q: name,
+        sfw: 'true',
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      const url = `${this.base_url}/anime?${params.toString()}`;
+
+      const response: AxiosResponse<IAnimeQuery> = await axios.get(url, {
+        headers: { accept: 'application/json' },
+        timeout: 60_000,
+        httpsAgent: this.agent,
+      });
 
       if (!response.data) {
         throw new HttpException(
@@ -235,9 +251,24 @@ export class JikanService {
     }
   }
 
-  async getSchedule(filter: ScheduleFilter): Promise<Schedule[]> {
+  async getSchedule(
+    filter: ScheduleFilter,
+  ): Promise<IScheculeInterface | null> {
     try {
-      const url = `${this.base_url}/schedules?sfw=true&limit=20${filter.day ? `&filter=${filter.day}` : ''}${filter.page ? `&page=${filter.page}` : ''}`;
+      const params = new URLSearchParams({
+        sfw: 'true',
+        limit: '25',
+      });
+
+      if (filter.day) {
+        params.append('filter', filter.day);
+      }
+
+      if (filter.page) {
+        params.append('page', filter.page.toString());
+      }
+
+      const url = `${this.base_url}/schedules?${params.toString()}`;
       const response: AxiosResponse<IScheculeInterface> = await axios.get(url, {
         headers: { accept: 'application/json' },
         timeout: 60_000,
@@ -249,10 +280,10 @@ export class JikanService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error) && error?.response?.status === 429) {
-        return [];
+        return null;
       }
       this.logger.error(
         `[getSchedule] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,

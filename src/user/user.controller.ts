@@ -22,7 +22,6 @@ import { AuthGuard } from '../auth/auth.guard';
 import { GenerateTokenDto } from './dto/generateToken.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { StaffRecomendationResponseDto } from '../anime/dto/response/staff-recomendation.response.dto';
 
 @Controller('user')
 export class UserController {
@@ -133,7 +132,10 @@ export class UserController {
   })
   async createToken(@Body() dto: GenerateTokenDto) {
     await this.userService.sendRefactorCodeMail(dto.email);
-    return { message: 'If the email is registered, a code has been sent', status: 200};
+    return {
+      message: 'If the email is registered, a code has been sent',
+      status: 200,
+    };
   }
 
   @Post('verification-token')

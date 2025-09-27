@@ -37,6 +37,9 @@ export class CalendarModel extends Model<
   @Column({ type: DataType.STRING, allowNull: true })
   declare release_time: string | null;
 
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+  declare last_week: boolean;
+
   @Column({ type: DataType.INTEGER, allowNull: true })
   declare episode_count: number | null;
 

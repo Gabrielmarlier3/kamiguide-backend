@@ -1,4 +1,4 @@
-import { Get, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { CalendarService } from './calendar.service';
 import { CalendarController } from './calendar.controller';
 import { JikanService } from '../jikan/jikan.service';

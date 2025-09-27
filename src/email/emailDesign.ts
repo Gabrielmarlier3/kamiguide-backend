@@ -181,10 +181,10 @@ export function emailDesign(
 
     <div class="message">
       ${
-    recovery
-      ? 'We received a request to reset your KamiGuide password. If you made this request, use the verification code below.'
-      : 'To complete your registration, please verify your email address by entering the code below. If you did not try to create a KamiGuide account, you can safely ignore this email.'
-  }
+        recovery
+          ? 'We received a request to reset your KamiGuide password. If you made this request, use the verification code below.'
+          : 'To complete your registration, please verify your email address by entering the code below. If you did not try to create a KamiGuide account, you can safely ignore this email.'
+      }
    </div>
 
     <div class="code-container">

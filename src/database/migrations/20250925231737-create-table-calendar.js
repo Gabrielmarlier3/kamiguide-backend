@@ -28,7 +28,7 @@ module.exports = {
           'thursday',
           'friday',
           'saturday',
-          'sunday'
+          'sunday',
         ),
         allowNull: false,
       },
@@ -53,6 +53,11 @@ module.exports = {
         allowNull: true,
       },
 
+      last_week: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -68,7 +73,7 @@ module.exports = {
     await queryInterface.addConstraint('schedule', {
       fields: ['user_uid', 'mal_id'],
       type: 'unique',
-      name: 'unique_user_anime'
+      name: 'unique_user_anime',
     });
   },
 

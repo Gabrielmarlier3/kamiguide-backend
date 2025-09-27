@@ -14,6 +14,7 @@ import {
   GenreTabDto,
 } from './dto/response/genre-search.response.dto';
 import { SearchResponseDto } from './dto/response/search.response.dto';
+import { sleep } from '../utils/sleep.util';
 
 @Injectable()
 export class AnimeService {
@@ -39,9 +40,9 @@ export class AnimeService {
         this.logger.warn(
           `Attempt ${i + 1} failed for genre: ${genreName}. Retrying...`,
         );
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await sleep(1000);
       }
-      await new Promise((resolve) => setTimeout(resolve, 333));
+      await sleep(333);
     }
     return exploreData.map((data) => {
       const genre = data.animes;

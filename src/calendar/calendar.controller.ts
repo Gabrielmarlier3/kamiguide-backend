@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { GetUserCalendarRequestDto } from './dto/request/getUserCalendar.request.dto';
 import { CalendarService } from './calendar.service';
 import { getOrSet } from '../utils/cache.util';
@@ -18,7 +27,7 @@ export class CalendarController {
 
   @Get()
   @ApiOkResponse({
-    description: 'Get staff recomendation.',
+    description: 'Get staff recommendation.',
     type: [GetUserCalendarResponseDto],
   })
   async getAiring(
@@ -58,5 +67,13 @@ export class CalendarController {
     @Body() dto: AddUserCalendarDto,
   ): Promise<GetUserCalendarResponseDto[]> {
     return this.calendarService.addToUserCalendar(userUid, dto);
+  }
+
+  @Delete('user/:mal_id')
+  async removeAnimeFromUserCalendar(
+    @UserUid() userUid: string,
+    @Param('mal_id') malId: number,
+  ): Promise<GetUserCalendarResponseDto[]> {
+    return this.calendarService.removeFromUserCalendar(userUid, malId);
   }
 }

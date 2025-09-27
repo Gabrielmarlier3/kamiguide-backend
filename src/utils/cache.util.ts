@@ -1,4 +1,5 @@
 import type { Redis } from 'ioredis';
+import { sleep } from './sleep.util';
 
 export async function getOrSet<T>(
   redis: Redis,
@@ -14,7 +15,7 @@ export async function getOrSet<T>(
   const gotLock = await redis.set(lockKey, '1', 'PX', 3000, 'NX');
   if (!gotLock) {
     //wait a bit and try get if someone else already loaded the cache return else load ourselves
-    await new Promise((r) => setTimeout(r, 1000));
+    await sleep(1000);
     const retry = await redis.get(key);
     if (retry) return JSON.parse(retry) as T;
   }

@@ -12,6 +12,7 @@ module.exports = {
         release_time: '18:00',
         episode_count: 64,
         image_url: 'https://cdn.myanimelist.net/images/anime/1208/94745.jpg',
+        last_week: false,
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -23,6 +24,7 @@ module.exports = {
         release_time: '20:00',
         episode_count: 24,
         image_url: 'https://cdn.myanimelist.net/images/anime/5/73199.jpg',
+        last_week: false,
         created_at: new Date(),
         updated_at: new Date(),
       }

@@ -9,6 +9,6 @@ export enum DayFilter {
 }
 
 export interface ScheduleFilter {
-  day: DayFilter;
+  day?: DayFilter;
   page?: number;
 }

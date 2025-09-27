@@ -12,7 +12,8 @@ import { SearchQueryDto } from './dto/request/search.request.dto';
 import { GetAnimeByGenreDto } from './dto/request/genre-search.request.dto';
 import { RedisService } from '../redis/redis.service';
 import { getOrSet } from '../utils/cache.util';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
+import { sleep } from '../utils/sleep.util';
 
 @Controller('anime')
 export class AnimeController implements OnModuleInit {
@@ -29,14 +30,14 @@ export class AnimeController implements OnModuleInit {
     }
   }
 
-  @Cron(CronExpression.MONDAY_TO_FRIDAY_AT_1AM)
+  @Cron('0 0 1 * * 1', { timeZone: 'America/Sao_Paulo' })
   async handleCron(): Promise<void> {
     await this.redis.client.flushall();
     await Promise.all([
       this.getStaffRecommendation(),
       this.getPopularRecomendation(),
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 666));
+    await sleep(666);
     await this.getExploreRecommendation();
     this.logger.log('Finished cache refresh via cron job');
   }
