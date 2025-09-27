@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { JikanService } from '../jikan/jikan.service';
 import { ScheduleFilter } from '../jikan/interface/scheduleFilter.interface';
 import { GetUserCalendarResponseDto } from './dto/response/getUserCalendar.response.dto';
@@ -53,9 +59,15 @@ export class CalendarService {
       return this.retrieveUserCalendar(userCalendar);
     } catch (e) {
       this.logger.error(
-        `Error fetching user calendar for userUid ${userUid}: ${e.message}`,
+        `[getUserCalendar] Error fetching calendar for userUid ${userUid}: ${
+          e instanceof Error ? e.message : 'Unknown error'
+        }`,
       );
-      throw e;
+
+      throw new HttpException(
+        'Error fetching user calendar',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -84,15 +96,32 @@ export class CalendarService {
         );
       }
       this.logger.error(
-        `Unexpected error while adding anime to calendar for user ${userUid}: ${error.message}`,
+        `[addToUserCalendar] Unexpected error creating record for user ${userUid}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
       );
-      throw error;
+      throw new HttpException(
+        'Error adding anime to calendar',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
-    const userCalendar = await this.calendarModel.findAll({
-      where: { user_uid: userUid },
-    });
-    return this.retrieveUserCalendar(userCalendar);
+    try {
+      const userCalendar = await this.calendarModel.findAll({
+        where: { user_uid: userUid },
+      });
+      return this.retrieveUserCalendar(userCalendar);
+    } catch (error) {
+      this.logger.error(
+        `[addToUserCalendar] Error fetching updated calendar for user ${userUid}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
+      throw new HttpException(
+        'Error fetching updated user calendar',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async removeFromUserCalendar(
@@ -105,15 +134,32 @@ export class CalendarService {
       });
     } catch (e) {
       this.logger.error(
-        `Error removing anime (malId=${malId}) from user calendar for userUid ${userUid}: ${e.message}`,
+        `[removeFromUserCalendar] Error removing anime (malId=${malId}) for user ${userUid}: ${
+          e instanceof Error ? e.message : 'Unknown error'
+        }`,
       );
-      throw e;
+      throw new HttpException(
+        'Error removing anime from user calendar',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
-    const userCalendar = await this.calendarModel.findAll({
-      where: { user_uid: userUid },
-    });
-    return this.retrieveUserCalendar(userCalendar);
+    try {
+      const userCalendar = await this.calendarModel.findAll({
+        where: { user_uid: userUid },
+      });
+      return this.retrieveUserCalendar(userCalendar);
+    } catch (e) {
+      this.logger.error(
+        `[removeFromUserCalendar] Error fetching updated calendar after removal for user ${userUid}: ${
+          e instanceof Error ? e.message : 'Unknown error'
+        }`,
+      );
+      throw new HttpException(
+        'Error fetching updated user calendar',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM)

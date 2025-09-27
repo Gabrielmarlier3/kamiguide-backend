@@ -12,7 +12,13 @@ import { GetUserCalendarRequestDto } from './dto/request/getUserCalendar.request
 import { CalendarService } from './calendar.service';
 import { getOrSet } from '../utils/cache.util';
 import { RedisService } from '../redis/redis.service';
-import { ApiBearerAuth, ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody, ApiConflictResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { GetUserCalendarResponseDto } from './dto/response/getUserCalendar.response.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserUid } from '../decorator/user-uid.decorator';
@@ -27,8 +33,28 @@ export class CalendarController {
 
   @Get()
   @ApiOkResponse({
-    description: 'Get staff recommendation.',
+    description: 'Get airing schedule of animes by day and page',
     type: [GetUserCalendarResponseDto],
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid query parameters',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Validation failed: "day" must be a valid enum value',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Error fetching schedule from Jikan API',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Error fetching schedule anime',
+        error: 'Internal Server Error',
+      },
+    },
   })
   async getAiring(
     @Query() dto: GetUserCalendarRequestDto,
@@ -48,6 +74,16 @@ export class CalendarController {
     description: 'Get user calendar.',
     type: [GetUserCalendarResponseDto],
   })
+  @ApiInternalServerErrorResponse({
+    description: 'Error fetching user calendar from database',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Error fetching user calendar',
+        error: 'Internal Server Error',
+      },
+    },
+  })
   async getUserCalendar(
     @UserUid() userUid: string,
   ): Promise<GetUserCalendarResponseDto[]> {
@@ -62,6 +98,26 @@ export class CalendarController {
     description: 'Add an anime to user calendar and return updated list.',
     type: [GetUserCalendarResponseDto],
   })
+  @ApiConflictResponse({
+    description: 'Anime already exists in user calendar',
+    schema: {
+      example: {
+        statusCode: 409,
+        message: 'This anime is already in the user calendar.',
+        error: 'Conflict',
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Unexpected error while adding or fetching user calendar',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Error fetching updated user calendar',
+        error: 'Internal Server Error',
+      },
+    },
+  })
   async addAnimeToUserCalendar(
     @UserUid() userUid: string,
     @Body() dto: AddUserCalendarDto,
@@ -70,6 +126,20 @@ export class CalendarController {
   }
 
   @Delete('user/:mal_id')
+  @ApiOkResponse({
+    description: 'Remove an anime from user calendar and return updated list.',
+    type: [GetUserCalendarResponseDto],
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Unexpected error while removing or fetching user calendar',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Error removing anime from user calendar',
+        error: 'Internal Server Error',
+      },
+    },
+  })
   async removeAnimeFromUserCalendar(
     @UserUid() userUid: string,
     @Param('mal_id') malId: number,
