@@ -73,11 +73,12 @@ module.exports = {
     await queryInterface.addConstraint('schedule', {
       fields: ['user_uid', 'mal_id'],
       type: 'unique',
-      name: 'unique_user_anime',
+      name: 'unique_user_mal_id_schedule',
     });
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.removeConstraint('schedule', 'unique_user_mal_id_schedule');
     await queryInterface.dropTable('schedule');
   },
 };

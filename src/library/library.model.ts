@@ -1,4 +1,5 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { InferAttributes, InferCreationAttributes } from 'sequelize';
 
 @Table({
   tableName: 'library',
@@ -6,7 +7,10 @@ import { Table, Column, Model, DataType } from 'sequelize-typescript';
   createdAt: 'created_at',
   updatedAt: 'updated_at',
 })
-export class LibraryModel extends Model<LibraryModel> {
+export class LibraryModel extends Model<
+  InferAttributes<LibraryModel>,
+  InferCreationAttributes<LibraryModel>
+> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
@@ -35,13 +39,19 @@ export class LibraryModel extends Model<LibraryModel> {
     type: DataType.STRING,
     allowNull: true,
   })
-  declare season: string;
+  declare season?: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  declare image_url: string;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
   })
-  declare year: number;
+  declare year?: number;
 
   @Column({
     type: DataType.STRING,
