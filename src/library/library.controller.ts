@@ -6,6 +6,7 @@ import { GetUserLibraryResponseDto } from './dto/response/getUserLibrary.dto';
 import { AddLibraryDto } from './dto/request/addToUserLibrary.dto';
 import { RemoveLibraryDto } from './dto/request/removeLibraryDto';
 import {
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -19,6 +20,7 @@ export class LibraryController {
 
   @Get('user')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get the user library' })
   @ApiOkResponse({
     description: 'Returns the full user library.',
@@ -36,6 +38,7 @@ export class LibraryController {
 
   @Post('user')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Add an anime to the user library' })
   @ApiOkResponse({
     description:
@@ -59,6 +62,7 @@ export class LibraryController {
 
   @Delete('user')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Remove an anime from the user library' })
   @ApiOkResponse({
     description:
