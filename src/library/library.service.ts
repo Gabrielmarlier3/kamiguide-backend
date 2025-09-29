@@ -103,15 +103,27 @@ export class LibraryService {
     malId: number,
   ): Promise<GetUserLibraryResponseDto[]> {
     try {
-      await this.libraryModel.destroy({
+      const count = await this.libraryModel.destroy({
         where: { user_uid: userUid, mal_id: malId },
       });
+      if (count == 0) {
+        this.logger.log(
+          `No record found to delete for user ${userUid} and malId ${malId}`,
+        );
+        throw new HttpException(
+          'No record found to delete',
+          HttpStatus.NOT_FOUND,
+        );
+      }
     } catch (error) {
       this.logger.error(
         `[removeFromUserLibrary] Unexpected error deleting record for user ${userUid}: ${
           error instanceof Error ? error.message : 'Unknown error'
         }`,
       );
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException(
         'Error removing anime from library',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -136,7 +148,6 @@ export class LibraryService {
     }
   }
 
-  //todo: criar logica para atualizar todas os animes da biblioteca
   @Cron('0 0 1 * * 7', { timeZone: 'America/Sao_Paulo' })
   async updateLibraryStatus(): Promise<void> {
     let offset = 0;
