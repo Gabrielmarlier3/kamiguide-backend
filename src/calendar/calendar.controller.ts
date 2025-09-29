@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { GetUserCalendarRequestDto } from './dto/request/getUserCalendar.request.dto';
 import { CalendarService } from './calendar.service';
-import { getOrSet } from '../utils/cache.util';
+import { cacheSet, getOrSet } from '../utils/cache.util';
 import { RedisService } from '../redis/redis.service';
 import {
   ApiBadRequestResponse,
@@ -88,7 +88,11 @@ export class CalendarController {
   async getUserCalendar(
     @UserUid() userUid: string,
   ): Promise<GetUserCalendarResponseDto[]> {
-    return this.calendarService.getUserCalendar(userUid);
+    const key = `app:user:calendar:v1:${userUid}`;
+    const TTL_10_MINUTES = 600; // 10 minutes in seconds
+    return await getOrSet(this.redis.client, key, TTL_10_MINUTES, () =>
+      this.calendarService.getUserCalendar(userUid),
+    );
   }
 
   @Post('user')
@@ -123,7 +127,11 @@ export class CalendarController {
     @UserUid() userUid: string,
     @Body() dto: AddUserCalendarDto,
   ): Promise<GetUserCalendarResponseDto[]> {
-    return this.calendarService.addToUserCalendar(userUid, dto);
+    const key = `app:user:calendar:v1:${userUid}`;
+    const TTL_10_MINUTES = 600; // 10 minutes in seconds
+    const newCalendar = this.calendarService.addToUserCalendar(userUid, dto);
+    await cacheSet(this.redis.client, key, TTL_10_MINUTES, newCalendar);
+    return newCalendar;
   }
 
   @Delete('user/:mal_id')
@@ -145,6 +153,13 @@ export class CalendarController {
     @UserUid() userUid: string,
     @Param('mal_id') malId: number,
   ): Promise<GetUserCalendarResponseDto[]> {
-    return this.calendarService.removeFromUserCalendar(userUid, malId);
+    const key = `app:user:calendar:v1:${userUid}`;
+    const TTL_10_MINUTES = 600; // 10 minutes in seconds
+    const newCalendar = await this.calendarService.removeFromUserCalendar(
+      userUid,
+      malId,
+    );
+    await cacheSet(this.redis.client, key, TTL_10_MINUTES, newCalendar);
+    return newCalendar;
   }
 }
