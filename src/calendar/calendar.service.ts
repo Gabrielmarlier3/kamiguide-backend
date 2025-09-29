@@ -89,7 +89,7 @@ export class CalendarService {
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         this.logger.warn(
-          `User ${userUid} tried to add a duplicate anime (malId=${dto.malId}).`,
+          `User ${userUid} tried to add a duplicate anime calendar (malId=${dto.malId}).`,
         );
         throw new ConflictException(
           'This anime is already in the user calendar.',
