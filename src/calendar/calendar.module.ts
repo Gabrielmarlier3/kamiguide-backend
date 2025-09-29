@@ -7,7 +7,7 @@ import { CalendarModel } from './calendar.model';
 import { SequelizeModule } from '@nestjs/sequelize';
 
 @Module({
-  imports: [SequelizeModule.forFeature([CalendarModel])],
+  imports: [SequelizeModule.forFeature([CalendarModel]), JikanService],
   providers: [CalendarService, JikanService, RedisService],
   controllers: [CalendarController],
 })

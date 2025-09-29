@@ -12,6 +12,9 @@ import { GetUserLibraryResponseDto } from './dto/response/getUserLibrary.dto';
 import { AnimeStatus } from '../jikan/interface/anime-status.interface';
 import { UniqueConstraintError } from 'sequelize';
 import { Cron } from '@nestjs/schedule';
+import { AnimeDetails } from '../jikan/interface/full-anime.interface';
+import { JikanService } from '../jikan/jikan.service';
+import { sleep } from '../utils/sleep.util';
 
 @Injectable()
 export class LibraryService {
@@ -20,6 +23,7 @@ export class LibraryService {
   constructor(
     @InjectModel(LibraryModel)
     private readonly libraryModel: typeof LibraryModel,
+    private readonly jikanService: JikanService,
   ) {}
 
   async getUserLibrary(userUid: string): Promise<GetUserLibraryResponseDto[]> {
@@ -133,8 +137,54 @@ export class LibraryService {
   }
 
   //todo: criar logica para atualizar todas os animes da biblioteca
-  @Cron('0 0 2 * * 7', { timeZone: 'America/Sao_Paulo' })
-  async updateLibraryStatus(): Promise<void> {}
+  @Cron('0 0 1 * * 7', { timeZone: 'America/Sao_Paulo' })
+  async updateLibraryStatus(): Promise<void> {
+    let offset = 0;
+    const limit = 30;
+
+    while (true) {
+      const items = await this.libraryModel.findAll({
+        attributes: ['mal_id'],
+        group: ['mal_id'],
+        raw: true,
+        limit,
+        offset,
+      });
+
+      if (items.length === 0) {
+        break;
+      }
+
+      for (const item of items) {
+        const anime: AnimeDetails = await this.jikanService.getAnimeDetailsById(
+          item.mal_id,
+        );
+        if (!anime) {
+          this.logger.warn(
+            `Anime with mal_id ${item.mal_id} not found during library update.`,
+          );
+          await sleep(333);
+          continue;
+        }
+        await this.libraryModel.update(
+          {
+            mal_id: anime.mal_id,
+            title: anime.title,
+            image_url: anime.images.jpg.image_url,
+            status: anime.status,
+            media_type: anime.type == 'TV' ? 'Series' : anime.type,
+            year: anime.year ?? null,
+            season: anime.season,
+          },
+          { where: { mal_id: anime.mal_id } },
+        );
+        await sleep(333);
+      }
+
+      offset += limit;
+    }
+    this.logger.log('Finished updating library statuses via cron job');
+  }
 
   formatedUserLibrary(library: LibraryModel[]): GetUserLibraryResponseDto[] {
     return library.map((item) => ({

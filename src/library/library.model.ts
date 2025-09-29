@@ -30,10 +30,10 @@ export class LibraryModel extends Model<
   declare title: string;
 
   @Column({
-    type: DataType.ENUM('movie', 'series'),
+    type: DataType.STRING,
     allowNull: false,
   })
-  declare media_type: 'movie' | 'series';
+  declare media_type: string;
 
   @Column({
     type: DataType.STRING,

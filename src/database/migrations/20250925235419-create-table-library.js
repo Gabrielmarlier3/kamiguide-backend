@@ -26,7 +26,7 @@ module.exports = {
       },
 
       media_type: {
-        type: Sequelize.ENUM('movie', 'series'),
+        type: Sequelize.STRING,
         allowNull: false,
       },
 
