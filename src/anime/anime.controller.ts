@@ -6,7 +6,7 @@ import { StaffRecomendationResponseDto } from './dto/response/staff-recomendatio
 import { PopularResponseDto } from './dto/response/popular.response.dto';
 import { ExploreResponseDto } from './dto/response/explore.response.dto';
 import { GenreTabDto } from './dto/response/genre-search.response.dto';
-import { SearchResponseDto } from './dto/response/search.response.dto';
+import { SearchPaginatedResponseDto } from './dto/response/search.response.dto';
 import { AvailableGenresDto } from './dto/response/available-genre.response.dto';
 import { SearchQueryDto } from './dto/request/search.request.dto';
 import { GetAnimeByGenreDto } from './dto/request/genre-search.request.dto';
@@ -35,7 +35,7 @@ export class AnimeController implements OnModuleInit {
     await this.redis.client.flushall();
     await Promise.all([
       this.getStaffRecommendation(),
-      this.getPopularRecomendation(),
+      this.getPopularRecommendation(),
     ]);
     await sleep(666);
     await this.getExploreRecommendation();
@@ -60,7 +60,7 @@ export class AnimeController implements OnModuleInit {
     const key = 'app:home:v1:stf_recommendation';
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
-      this.animeService.getStaffRecomendation(),
+      this.animeService.getStaffRecommendation(),
     );
   }
 
@@ -78,11 +78,11 @@ export class AnimeController implements OnModuleInit {
       },
     },
   })
-  async getPopularRecomendation(): Promise<PopularResponseDto[]> {
+  async getPopularRecommendation(): Promise<PopularResponseDto[]> {
     const key = 'app:home:v1:popular_recommendation';
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
-      this.animeService.getPopularRecomendation(),
+      this.animeService.getPopularRecommendation(),
     );
   }
 
@@ -104,7 +104,7 @@ export class AnimeController implements OnModuleInit {
     const key = 'app:home:v1:explore_recommendation';
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
-      this.animeService.getExploreRecomendation(),
+      this.animeService.getExploreRecommendation(),
     );
   }
 
@@ -133,7 +133,7 @@ export class AnimeController implements OnModuleInit {
   @Get('search')
   @ApiOkResponse({
     description: 'Search anime by name.',
-    type: [SearchResponseDto],
+    type: [SearchPaginatedResponseDto],
   })
   @ApiInternalServerErrorResponse({
     description: 'Internal server error.',
@@ -146,7 +146,7 @@ export class AnimeController implements OnModuleInit {
   })
   async findAnimeByName(
     @Query() q: SearchQueryDto,
-  ): Promise<SearchResponseDto[]> {
+  ): Promise<SearchPaginatedResponseDto> {
     const key = `app:search:v1:name:${q.name}:page:${q.page}}`;
     const TTL_1_HOUR = 60 * 60; // 1 hour in seconds
     return await getOrSet(this.redis.client, key, TTL_1_HOUR, () =>

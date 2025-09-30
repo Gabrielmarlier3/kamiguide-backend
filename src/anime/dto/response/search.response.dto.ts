@@ -85,3 +85,43 @@ export class SearchResponseDto {
   })
   season!: string;
 }
+
+export class PaginationDto {
+  @ApiProperty({
+    example: 1,
+    description: 'Current page number.',
+  })
+  page!: number;
+
+  @ApiProperty({
+    example: 20,
+    description: 'Number of items per page.',
+  })
+  perPage!: number;
+
+  @ApiProperty({
+    example: 240,
+    description: 'Total number of results for the search.',
+  })
+  totalResults!: number;
+
+  @ApiProperty({
+    example: 12,
+    description: 'Total number of pages.',
+  })
+  totalPages!: number;
+}
+
+export class SearchPaginatedResponseDto {
+  @ApiProperty({
+    type: () => PaginationDto,
+    description: 'Pagination metadata.',
+  })
+  pagination!: PaginationDto;
+
+  @ApiProperty({
+    type: () => [SearchResponseDto],
+    description: 'List of anime matching the search criteria.',
+  })
+  data!: SearchResponseDto[];
+}

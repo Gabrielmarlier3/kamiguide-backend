@@ -1,23 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator';
-import { AnimeGenreLabel } from '../../interface/anime-genres.interface';
-
-export class GenreSearchResponseDto {
-  @ApiProperty({
-    enum: AnimeGenreLabel,
-    description: 'Genre to be searched (enum defined in AnimeGenreLabel).',
-    example: 'Action',
-  })
-  @IsEnum(AnimeGenreLabel)
-  genre!: AnimeGenreLabel;
-
-  @ApiProperty({
-    example: 1,
-    description: 'Page number (defaults to 1).',
-    required: false,
-  })
-  page?: number = 1;
-}
 
 export class GenreDetailDto {
   @ApiProperty({
@@ -69,16 +50,42 @@ export class GenreDetailDto {
   year!: number;
 }
 
+export class PaginationDto {
+  @ApiProperty({
+    example: 1,
+    description: 'Current page number.',
+  })
+  page!: number;
+
+  @ApiProperty({
+    example: 20,
+    description: 'Number of items per page.',
+  })
+  perPage!: number;
+
+  @ApiProperty({
+    example: 240,
+    description: 'Total number of results for the given genre.',
+  })
+  totalResults!: number;
+
+  @ApiProperty({
+    example: 12,
+    description: 'Total number of pages.',
+  })
+  totalPages!: number;
+}
+
 export class GenreTabDto {
   @ApiProperty({
-    example: 120,
-    description: 'Total number of anime for the given genre.',
+    type: () => PaginationDto,
+    description: 'Pagination metadata.',
   })
-  total!: number;
+  pagination!: PaginationDto;
 
   @ApiProperty({
     type: () => [GenreDetailDto],
     description: 'List of anime details belonging to the selected genre.',
   })
-  animes!: GenreDetailDto[];
+  data!: GenreDetailDto[];
 }

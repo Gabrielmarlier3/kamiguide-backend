@@ -92,7 +92,7 @@ export class JikanService {
     }
   }
 
-  async getAnimeByGenre(filter: IGenreAnimeFilter): Promise<GenreReturn> {
+  async getAnimeByGenre(filter: IGenreAnimeFilter): Promise<IGenreSorted> {
     try {
       const params = new URLSearchParams({
         genres: filter.genreId.toString(),
@@ -121,13 +121,22 @@ export class JikanService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      return {
-        length: response.data.pagination.items.total,
-        animes: response.data.data,
-      };
+      return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error) && error?.response?.status === 429) {
-        return { length: 0, animes: [] };
+        return {
+          pagination: {
+            current_page: 1,
+            has_next_page: false,
+            items: {
+              count: 0,
+              total: 0,
+              per_page: filter.limit ?? 12,
+            },
+            last_visible_page: 1,
+          },
+          data: [],
+        };
       }
       this.logger.error(
         `Error while fetching anime by genre with filter: ${JSON.stringify(filter)} - ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -146,7 +155,7 @@ export class JikanService {
     name: string,
     page: number,
     limit: number,
-  ): Promise<Quered[]> {
+  ): Promise<IAnimeQuery> {
     try {
       const params = new URLSearchParams({
         q: name,
@@ -170,7 +179,7 @@ export class JikanService {
         );
       }
 
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       this.logger.error(
         `[getAnimeByName] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
