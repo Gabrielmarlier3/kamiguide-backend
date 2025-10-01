@@ -12,10 +12,10 @@ export interface AnimeDetails {
   title: string;
   title_english: string;
   title_japanese: string;
-  title_synonyms: any[];
+  title_synonyms: string[];
   type: string;
   source: string;
-  episodes: number;
+  episodes: any;
   status: string;
   airing: boolean;
   aired: Aired;
@@ -37,10 +37,10 @@ export interface AnimeDetails {
   studios: Studio[];
   genres: Genre[];
   explicit_genres: any[];
-  themes: Theme[];
-  demographics: any[];
+  themes: any[];
+  demographics: Demographic[];
   relations: Relation[];
-  theme: Theme2;
+  theme: Theme;
   external: External[];
   streaming: Streaming[];
 }
@@ -84,7 +84,7 @@ export interface Title {
 
 export interface Aired {
   from: string;
-  to: string;
+  to: any;
   prop: Prop;
   string: string;
 }
@@ -101,9 +101,9 @@ export interface From {
 }
 
 export interface To {
-  day: number;
-  month: number;
-  year: number;
+  day: any;
+  month: any;
+  year: any;
 }
 
 export interface Broadcast {
@@ -141,7 +141,7 @@ export interface Genre {
   url: string;
 }
 
-export interface Theme {
+export interface Demographic {
   mal_id: number;
   type: string;
   name: string;
@@ -160,7 +160,7 @@ export interface Entry {
   url: string;
 }
 
-export interface Theme2 {
+export interface Theme {
   openings: string[];
   endings: string[];
 }

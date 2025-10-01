@@ -1,5 +1,17 @@
-import { Controller, Get, Query, OnModuleInit, Logger } from '@nestjs/common';
-import { ApiInternalServerErrorResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Query,
+  OnModuleInit,
+  Logger,
+  Param,
+} from '@nestjs/common';
+import {
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+} from '@nestjs/swagger';
 import { AnimeService } from './anime.service';
 import { AvailableGenres } from './interface/anime-genres.interface';
 import { StaffRecomendationResponseDto } from './dto/response/staff-recomendation.response.dto';
@@ -14,6 +26,7 @@ import { RedisService } from '../redis/redis.service';
 import { getOrSet } from '../utils/cache.util';
 import { Cron } from '@nestjs/schedule';
 import { sleep } from '../utils/sleep.util';
+import { AnimeDetailsDto } from './dto/response/anime-details.dto';
 
 @Controller('anime')
 export class AnimeController implements OnModuleInit {
@@ -40,6 +53,43 @@ export class AnimeController implements OnModuleInit {
     await sleep(666);
     await this.getExploreRecommendation();
     this.logger.log('Finished cache refresh via cron job');
+  }
+
+  @Get(':id')
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'MyAnimeList anime ID',
+    example: 5114,
+  })
+  @ApiOkResponse({
+    description: 'Anime details successfully retrieved.',
+    type: AnimeDetailsDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Anime not found.',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Anime with the given ID not found',
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error while fetching anime details.',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Error fetching anime details',
+      },
+    },
+  })
+  async getAnimeById(@Param('id') malId: number): Promise<AnimeDetailsDto> {
+    const key = 'app:home:v1:anime_by_id:';
+    const TTL_7_DAYS = 60 * 60 * 24; // 1 day in seconds
+    return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
+      this.animeService.getAnimeById(malId),
+    );
   }
 
   @Get('staff-recomendation')

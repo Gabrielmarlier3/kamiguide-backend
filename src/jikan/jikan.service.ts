@@ -5,7 +5,7 @@ import { IPopularAnime, Tops } from './interface/popular-anime.interface';
 import { IGenreSorted } from './interface/genre-sorted.interface';
 import { IAnimeQuery, Quered } from './interface/anime-query.interface';
 import { Agent } from 'https';
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, isAxiosError } from 'axios';
 import * as dns from 'node:dns';
 import { IGenreAnimeFilter } from './interface/genre-anime.interface';
 import { GenreReturn } from './interface/genre-return.interface';
@@ -214,6 +214,12 @@ export class JikanService {
 
       return response.data.data;
     } catch (error: any) {
+      if (isAxiosError(error) && error?.response?.status === 404) {
+        throw new HttpException(
+          'Anime with the given ID not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
       this.logger.error(
         `[getAnimeDetailsById] Error get anime ${error instanceof Error ? error.message : 'Unknown error'}`,
       );

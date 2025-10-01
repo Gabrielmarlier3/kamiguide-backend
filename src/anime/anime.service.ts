@@ -19,6 +19,7 @@ import {
 } from './dto/response/search.response.dto';
 import { sleep } from '../utils/sleep.util';
 import { GenreToIdMap } from '../utils/genreToId.util';
+import { AnimeDetailsDto } from './dto/response/anime-details.dto';
 
 @Injectable()
 export class AnimeService {
@@ -178,6 +179,32 @@ export class AnimeService {
           season: anime.season,
         };
       }) as SearchResponseDto[],
+    };
+  }
+
+  async getAnimeById(malId: number): Promise<AnimeDetailsDto> {
+    this.logger.log(`Fetching anime details by ID: ${malId}`);
+    const animeDetails = await this.jikan.getAnimeDetailsById(malId);
+
+    return {
+      title: animeDetails.title,
+      image_url: animeDetails.images.jpg.large_image_url,
+      mal_id: malId,
+      score: animeDetails.score,
+      season: animeDetails.season ?? 'Unknown',
+      status: animeDetails.status,
+      synopsis: animeDetails.synopsis,
+      type: animeDetails.type == 'TV' ? 'Series' : animeDetails.type,
+      year: animeDetails.year ?? 0,
+      streaming: animeDetails.streaming.map((stream) => ({
+        name: stream.name,
+        url: stream.url,
+      })),
+      genres: animeDetails.genres.map((genre) => ({
+        mal_id: genre.mal_id,
+        type: genre.type,
+        name: genre.name,
+      })),
     };
   }
 }
