@@ -85,7 +85,7 @@ export class AnimeController implements OnModuleInit {
     },
   })
   async getAnimeById(@Param('id') malId: number): Promise<AnimeDetailsDto> {
-    const key = 'app:home:v1:anime_by_id:';
+    const key = `app:home:v1:anime_by_id:${malId}`;
     const TTL_7_DAYS = 60 * 60 * 24; // 1 day in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
       this.animeService.getAnimeById(malId),
