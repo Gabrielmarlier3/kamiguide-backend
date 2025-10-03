@@ -7,19 +7,20 @@ import { IAnimeQuery } from '../jikan/interface/anime-query.interface';
 import { GenreReturn } from '../jikan/interface/genre-return.interface';
 import { AvailableGenres } from './interface/anime-genres.interface';
 import { ExploreResponseDto } from './dto/response/explore.response.dto';
-import { StaffRecomendationResponseDto } from './dto/response/staff-recomendation.response.dto';
-import { PopularResponseDto } from './dto/response/popular.response.dto';
+import { StaffDto } from './dto/response/staff-recomendation.response.dto';
+import { PopularDto, PopularResponseDto } from './dto/response/popular.response.dto';
 import {
   GenreDetailDto,
   GenreTabDto,
 } from './dto/response/genre-search.response.dto';
 import {
-  SearchPaginatedResponseDto,
+  SearchPaginated,
+
   SearchResponseDto,
 } from './dto/response/search.response.dto';
 import { sleep } from '../utils/sleep.util';
 import { GenreToIdMap } from '../utils/genreToId.util';
-import { AnimeDetailsDto } from './dto/response/anime-details.dto';
+import { AnimeDetailsDto, AnimeDetailsResponseDto } from './dto/response/anime-details.dto';
 
 @Injectable()
 export class AnimeService {
@@ -61,7 +62,7 @@ export class AnimeService {
     }) as ExploreResponseDto[];
   }
 
-  async getStaffRecommendation(): Promise<StaffRecomendationResponseDto[]> {
+  async getStaffRecommendation(): Promise<StaffDto[]> {
     this.logger.log('Fetching staff recommendation data...');
     const animes: Season[] = await this.jikan.getSeasonAnime(3);
 
@@ -81,10 +82,10 @@ export class AnimeService {
           };
         }),
       };
-    }) as StaffRecomendationResponseDto[];
+    }) as StaffDto[];
   }
 
-  async getPopularRecommendation(): Promise<PopularResponseDto[]> {
+  async getPopularRecommendation(): Promise<PopularDto[]> {
     this.logger.log('Fetching popular recommendation data...');
     const animes: Tops[] = await this.jikan.getPopularRecomendation(10);
     return animes.map((anime: Tops) => {
@@ -102,7 +103,7 @@ export class AnimeService {
           };
         }),
       };
-    }) as PopularResponseDto[];
+    }) as PopularDto[];
   }
 
   async getAnimeByGenre(
@@ -145,7 +146,7 @@ export class AnimeService {
   async getAnimeByName(
     name: string,
     page: number,
-  ): Promise<SearchPaginatedResponseDto> {
+  ): Promise<SearchPaginated> {
     this.logger.log(`Searching anime by name: ${name}, page: ${page}`);
     const searchAnime: IAnimeQuery = await this.jikan.getAnimeByName(
       name,

@@ -20,7 +20,10 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
-import { GetUserCalendarResponseDto } from './dto/response/getUserCalendar.response.dto';
+import {
+  GetUserCalendarDto,
+  GetUserCalendarResponseDto,
+} from './dto/response/getUserCalendar.response.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserUid } from '../decorator/user-uid.decorator';
 import { AddUserCalendarDto } from './dto/request/addUserCalendar.request';
@@ -59,7 +62,7 @@ export class CalendarController {
   })
   async getAiring(
     @Query() dto: GetUserCalendarRequestDto,
-  ): Promise<GetUserCalendarResponseDto[]> {
+  ): Promise<GetUserCalendarResponseDto> {
     const key = `app:calendar:v1:${dto.day}:${dto.page}`;
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
 
@@ -87,7 +90,7 @@ export class CalendarController {
   })
   async getUserCalendar(
     @UserUid() userUid: string,
-  ): Promise<GetUserCalendarResponseDto[]> {
+  ): Promise<GetUserCalendarResponseDto> {
     const key = `app:user:calendar:v1:${userUid}`;
     const TTL_10_MINUTES = 600; // 10 minutes in seconds
     return await getOrSet(this.redis.client, key, TTL_10_MINUTES, () =>
@@ -126,12 +129,18 @@ export class CalendarController {
   async addAnimeToUserCalendar(
     @UserUid() userUid: string,
     @Body() dto: AddUserCalendarDto,
-  ): Promise<GetUserCalendarResponseDto[]> {
+  ): Promise<GetUserCalendarResponseDto> {
     const key = `app:user:calendar:v1:${userUid}`;
     const TTL_10_MINUTES = 600; // 10 minutes in seconds
-    const newCalendar = this.calendarService.addToUserCalendar(userUid, dto);
+    const newCalendar = await this.calendarService.addToUserCalendar(
+      userUid,
+      dto,
+    );
     await cacheSet(this.redis.client, key, TTL_10_MINUTES, newCalendar);
-    return newCalendar;
+    return {
+      payload: newCalendar,
+      fetchedAt: new Date().toISOString(),
+    };
   }
 
   @Delete('user/:mal_id')
@@ -152,14 +161,15 @@ export class CalendarController {
   async removeAnimeFromUserCalendar(
     @UserUid() userUid: string,
     @Param('mal_id') malId: number,
-  ): Promise<GetUserCalendarResponseDto[]> {
+  ): Promise<GetUserCalendarResponseDto> {
     const key = `app:user:calendar:v1:${userUid}`;
     const TTL_10_MINUTES = 600; // 10 minutes in seconds
-    const newCalendar = await this.calendarService.removeFromUserCalendar(
-      userUid,
-      malId,
-    );
+    const newCalendar: GetUserCalendarDto[] =
+      await this.calendarService.removeFromUserCalendar(userUid, malId);
     await cacheSet(this.redis.client, key, TTL_10_MINUTES, newCalendar);
-    return newCalendar;
+    return {
+      payload: newCalendar,
+      fetchedAt: new Date().toISOString(),
+    };
   }
 }

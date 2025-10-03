@@ -22,6 +22,19 @@ export class GenreDto {
 
 export class StaffRecomendationResponseDto {
   @ApiProperty({
+    type: () => [StaffDto],
+    description: 'List of staff recommendations.',
+  })
+  payload: StaffDto[];
+  @ApiProperty({
+    example: new Date(),
+    description: 'Timestamp when the data was fetched.',
+  })
+  fetchedAt: string;
+}
+
+export class StaffDto {
+  @ApiProperty({
     example: 5114,
     description: 'Anime ID from MyAnimeList (Jikan).',
   })

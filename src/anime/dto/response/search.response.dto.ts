@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { StaffDto } from './staff-recomendation.response.dto';
 
 export class GenreDto {
   @ApiProperty({
@@ -112,7 +113,7 @@ export class PaginationDto {
   totalPages!: number;
 }
 
-export class SearchPaginatedResponseDto {
+export class SearchPaginated {
   @ApiProperty({
     type: () => PaginationDto,
     description: 'Pagination metadata.',
@@ -124,4 +125,17 @@ export class SearchPaginatedResponseDto {
     description: 'List of anime matching the search criteria.',
   })
   data!: SearchResponseDto[];
+}
+
+export class SearchPaginatedResponseDto {
+  @ApiProperty({
+    type: () => [SearchPaginated],
+    description: 'Search page result.',
+  })
+  payload: SearchPaginated;
+  @ApiProperty({
+    example: new Date(),
+    description: 'Timestamp when the data was fetched.',
+  })
+  fetchedAt: string;
 }

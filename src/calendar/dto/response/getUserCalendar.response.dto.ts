@@ -3,6 +3,20 @@ import { DayFilter } from '../../../jikan/interface/scheduleFilter.interface';
 
 export class GetUserCalendarResponseDto {
   @ApiProperty({
+    type: () => [GetUserCalendarDto],
+    description: 'List of anime episodes in the user calendar',
+  })
+  payload: GetUserCalendarDto[];
+
+  @ApiProperty({
+    example: new Date(),
+    description: 'Timestamp when the data was fetched',
+  })
+  fetchedAt: string;
+}
+
+export class GetUserCalendarDto {
+  @ApiProperty({
     example: 5114,
     description: 'MyAnimeList ID of the anime',
   })

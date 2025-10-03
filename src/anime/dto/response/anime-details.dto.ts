@@ -12,10 +12,16 @@ export class GenreDto {
 }
 
 export class StreamingDto {
-  @ApiProperty({ example: 'Crunchyroll', description: 'Streaming platform name' })
+  @ApiProperty({
+    example: 'Crunchyroll',
+    description: 'Streaming platform name',
+  })
   name!: string;
 
-  @ApiProperty({ example: 'https://crunchyroll.com/anime', description: 'Streaming platform URL' })
+  @ApiProperty({
+    example: 'https://crunchyroll.com/anime',
+    description: 'Streaming platform URL',
+  })
   url!: string;
 }
 
@@ -85,4 +91,18 @@ export class AnimeDetailsDto {
     description: 'Anime genres list',
   })
   genres!: GenreDto[];
+}
+
+export class AnimeDetailsResponseDto {
+  @ApiProperty({
+    type: () => AnimeDetailsDto,
+    description: 'Detailed information about the anime',
+  })
+  payload!: AnimeDetailsDto;
+
+  @ApiProperty({
+    example: new Date(),
+    description: 'Timestamp when the data was fetched',
+  })
+  fetchedAt!: string;
 }

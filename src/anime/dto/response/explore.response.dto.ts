@@ -13,3 +13,15 @@ export class ExploreResponseDto {
   })
   image!: string;
 }
+export class ExploreListResponseDto {
+  @ApiProperty({
+    type: () => [ExploreResponseDto],
+    description: 'List of genres with representative anime images.',
+  })
+  payload!: ExploreResponseDto[];
+  @ApiProperty({
+    example: new Date().toISOString(),
+    description: 'Timestamp when the data was fetched.',
+  })
+  fetchedAt!: string;
+}

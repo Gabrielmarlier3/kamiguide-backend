@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { JikanService } from '../jikan/jikan.service';
 import { ScheduleFilter } from '../jikan/interface/scheduleFilter.interface';
-import { GetUserCalendarResponseDto } from './dto/response/getUserCalendar.response.dto';
+import { GetUserCalendarDto, GetUserCalendarResponseDto } from './dto/response/getUserCalendar.response.dto';
 import { Schedule } from '../jikan/interface/schedule.interface';
 import { InjectModel } from '@nestjs/sequelize';
 import { CalendarModel } from './calendar.model';
@@ -29,7 +29,7 @@ export class CalendarService {
 
   async getCalendar(
     filter: ScheduleFilter,
-  ): Promise<GetUserCalendarResponseDto[]> {
+  ): Promise<GetUserCalendarDto[]> {
     try {
       this.logger.log(
         `Fetching calendar for ${filter.day} - Page: ${filter.page}`,
@@ -51,7 +51,7 @@ export class CalendarService {
 
   async getUserCalendar(
     userUid: string,
-  ): Promise<GetUserCalendarResponseDto[]> {
+  ): Promise<GetUserCalendarDto[]> {
     try {
       const userCalendar = await this.calendarModel.findAll({
         where: { user_uid: userUid },
@@ -74,7 +74,7 @@ export class CalendarService {
   async addToUserCalendar(
     userUid: string,
     dto: AddUserCalendarDto,
-  ): Promise<GetUserCalendarResponseDto[]> {
+  ): Promise<GetUserCalendarDto[]> {
     try {
       await this.calendarModel.create({
         user_uid: userUid,
@@ -127,7 +127,7 @@ export class CalendarService {
   async removeFromUserCalendar(
     userUid: string,
     malId: number,
-  ): Promise<GetUserCalendarResponseDto[]> {
+  ): Promise<GetUserCalendarDto[]> {
     try {
       await this.calendarModel.destroy({
         where: { user_uid: userUid, mal_id: malId },
@@ -247,13 +247,13 @@ export class CalendarService {
             title: anime.title,
             releaseTime: anime.broadcast.time ?? null,
             imageUrl: anime.images.jpg.small_image_url,
-          }) as GetUserCalendarResponseDto,
+          }) as GetUserCalendarDto,
       );
   }
 
   private retrieveUserCalendar(
     calendar: CalendarModel[],
-  ): GetUserCalendarResponseDto[] {
+  ): GetUserCalendarDto[] {
     return calendar.map(
       (anime: CalendarModel) =>
         ({
@@ -263,7 +263,7 @@ export class CalendarService {
           title: anime.title,
           releaseTime: anime.release_time ?? null,
           imageUrl: anime.image_url,
-        }) as GetUserCalendarResponseDto,
+        }) as GetUserCalendarDto,
     );
   }
 }

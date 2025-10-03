@@ -6,9 +6,9 @@ export async function getOrSet<T>(
   key: string,
   ttlSec: number,
   loader: () => Promise<T>,
-): Promise<T> {
+): Promise<{ payload: T; fetchedAt: string }> {
   const hit = await redis.get(key);
-  if (hit) return JSON.parse(hit) as T;
+  if (hit) return JSON.parse(hit) as { payload: T; fetchedAt: string };
 
   //Simple distributed lock to not overload the source with many requests
   const lockKey = `${key}:lock`;
@@ -17,7 +17,7 @@ export async function getOrSet<T>(
     //wait a bit and try get if someone else already loaded the cache return else load ourselves
     await sleep(1000);
     const retry = await redis.get(key);
-    if (retry) return JSON.parse(retry) as T;
+    if (retry) return JSON.parse(retry) as { payload: T; fetchedAt: string };
   }
 
   try {
@@ -29,7 +29,10 @@ export async function getOrSet<T>(
       'EX',
       ttlSec + jitter,
     );
-    return { payload, fetchedAt: new Date().toISOString() } as any as T;
+    return { payload, fetchedAt: new Date().toISOString() } as any as {
+      payload: T;
+      fetchedAt: string;
+    };
   } finally {
     await redis.del(lockKey).catch(() => {});
   }

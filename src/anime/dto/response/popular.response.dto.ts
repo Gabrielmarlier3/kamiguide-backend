@@ -20,7 +20,7 @@ export class GenreDto {
   name!: string;
 }
 
-export class PopularResponseDto {
+export class PopularDto {
   @ApiProperty({
     example: 5114,
     description: 'Anime ID from MyAnimeList (Jikan).',
@@ -60,4 +60,18 @@ export class PopularResponseDto {
     ],
   })
   genres!: GenreDto[];
+}
+
+export class PopularResponseDto {
+  @ApiProperty({
+    type: () => [PopularDto],
+    description: 'List of popular anime.',
+  })
+  payload!: PopularDto[];
+
+  @ApiProperty({
+    example: new Date().toISOString(),
+    description: 'Timestamp when the data was fetched.',
+  })
+  fetchedAt!: string;
 }

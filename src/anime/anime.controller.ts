@@ -14,11 +14,9 @@ import {
 } from '@nestjs/swagger';
 import { AnimeService } from './anime.service';
 import { AvailableGenres } from './interface/anime-genres.interface';
-import { StaffRecomendationResponseDto } from './dto/response/staff-recomendation.response.dto';
 import { PopularResponseDto } from './dto/response/popular.response.dto';
-import { ExploreResponseDto } from './dto/response/explore.response.dto';
-import { GenreTabDto } from './dto/response/genre-search.response.dto';
-import { SearchPaginatedResponseDto } from './dto/response/search.response.dto';
+import { ExploreListResponseDto, ExploreResponseDto } from './dto/response/explore.response.dto';
+import { GenreSearchResponseDto, GenreTabDto } from './dto/response/genre-search.response.dto';
 import { AvailableGenresDto } from './dto/response/available-genre.response.dto';
 import { SearchQueryDto } from './dto/request/search.request.dto';
 import { GetAnimeByGenreDto } from './dto/request/genre-search.request.dto';
@@ -26,7 +24,9 @@ import { RedisService } from '../redis/redis.service';
 import { getOrSet } from '../utils/cache.util';
 import { Cron } from '@nestjs/schedule';
 import { sleep } from '../utils/sleep.util';
-import { AnimeDetailsDto } from './dto/response/anime-details.dto';
+import {  AnimeDetailsResponseDto } from './dto/response/anime-details.dto';
+import { SearchPaginatedResponseDto } from './dto/response/search.response.dto';
+import { StaffRecomendationResponseDto } from './dto/response/staff-recomendation.response.dto';
 
 @Controller('anime')
 export class AnimeController implements OnModuleInit {
@@ -55,7 +55,7 @@ export class AnimeController implements OnModuleInit {
     this.logger.log('Finished cache refresh via cron job');
   }
 
-  @Get(':id')
+  @Get('details/:id')
   @ApiParam({
     name: 'id',
     type: Number,
@@ -64,7 +64,7 @@ export class AnimeController implements OnModuleInit {
   })
   @ApiOkResponse({
     description: 'Anime details successfully retrieved.',
-    type: AnimeDetailsDto,
+    type: AnimeDetailsResponseDto,
   })
   @ApiNotFoundResponse({
     description: 'Anime not found.',
@@ -84,7 +84,7 @@ export class AnimeController implements OnModuleInit {
       },
     },
   })
-  async getAnimeById(@Param('id') malId: number): Promise<AnimeDetailsDto> {
+  async getAnimeById(@Param('id') malId: number): Promise<AnimeDetailsResponseDto> {
     const key = `app:home:v1:anime_by_id:${malId}`;
     const TTL_7_DAYS = 60 * 60 * 24; // 1 day in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
@@ -106,7 +106,7 @@ export class AnimeController implements OnModuleInit {
       },
     },
   })
-  async getStaffRecommendation(): Promise<StaffRecomendationResponseDto[]> {
+  async getStaffRecommendation(): Promise<StaffRecomendationResponseDto> {
     const key = 'app:home:v1:stf_recommendation';
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
@@ -128,7 +128,7 @@ export class AnimeController implements OnModuleInit {
       },
     },
   })
-  async getPopularRecommendation(): Promise<PopularResponseDto[]> {
+  async getPopularRecommendation(): Promise<PopularResponseDto> {
     const key = 'app:home:v1:popular_recommendation';
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
@@ -139,7 +139,7 @@ export class AnimeController implements OnModuleInit {
   @Get('explore')
   @ApiOkResponse({
     description: 'Get explore recomendation.',
-    type: [ExploreResponseDto],
+    type: [ExploreListResponseDto],
   })
   @ApiInternalServerErrorResponse({
     description: 'Internal server error.',
@@ -150,7 +150,7 @@ export class AnimeController implements OnModuleInit {
       },
     },
   })
-  async getExploreRecommendation(): Promise<ExploreResponseDto[]> {
+  async getExploreRecommendation(): Promise<ExploreListResponseDto> {
     const key = 'app:home:v1:explore_recommendation';
     const TTL_7_DAYS = 60 * 60 * 24 * 7; // 7 days in seconds
     return await getOrSet(this.redis.client, key, TTL_7_DAYS, () =>
@@ -172,7 +172,7 @@ export class AnimeController implements OnModuleInit {
       },
     },
   })
-  async getAnimeByGender(@Query() q: GetAnimeByGenreDto): Promise<GenreTabDto> {
+  async getAnimeByGender(@Query() q: GetAnimeByGenreDto): Promise<GenreSearchResponseDto> {
     const key = `app:explore:v1:genre:${q.genre}:page:${q.page}:year:${q.year}`;
     const TTL_1_DAY = 60 * 60 * 24; // 1 day in seconds
     return await getOrSet(this.redis.client, key, TTL_1_DAY, () =>

@@ -89,3 +89,17 @@ export class GenreTabDto {
   })
   data!: GenreDetailDto[];
 }
+
+export class GenreSearchResponseDto {
+  @ApiProperty({
+    type: () => GenreTabDto,
+    description: 'Anime list filtered by genre with pagination.',
+  })
+  payload!: GenreTabDto;
+
+  @ApiProperty({
+    example: new Date(),
+    description: 'Timestamp when the data was fetched.',
+  })
+  fetchedAt!: string;
+}
