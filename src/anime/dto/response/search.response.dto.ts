@@ -38,7 +38,7 @@ export class SearchResponseDto {
     example: 2009,
     description: 'Release year of the anime.',
   })
-  year!: number;
+  year?: number;
 
   @ApiProperty({
     example: 64,
@@ -56,7 +56,7 @@ export class SearchResponseDto {
     example: 9.1,
     description: 'Average score of the anime on MyAnimeList.',
   })
-  score!: number;
+  score?: number;
 
   @ApiProperty({
     example: 'https://cdn.myanimelist.net/images/anime/1208/94745.jpg',
@@ -84,7 +84,7 @@ export class SearchResponseDto {
     example: 'Spring',
     description: 'Season when the anime was released.',
   })
-  season!: string;
+  season?: string;
 }
 
 export class PaginationDto {

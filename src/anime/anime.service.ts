@@ -8,19 +8,24 @@ import { GenreReturn } from '../jikan/interface/genre-return.interface';
 import { AvailableGenres } from './interface/anime-genres.interface';
 import { ExploreResponseDto } from './dto/response/explore.response.dto';
 import { StaffDto } from './dto/response/staff-recomendation.response.dto';
-import { PopularDto, PopularResponseDto } from './dto/response/popular.response.dto';
+import {
+  PopularDto,
+  PopularResponseDto,
+} from './dto/response/popular.response.dto';
 import {
   GenreDetailDto,
   GenreTabDto,
 } from './dto/response/genre-search.response.dto';
 import {
   SearchPaginated,
-
   SearchResponseDto,
 } from './dto/response/search.response.dto';
 import { sleep } from '../utils/sleep.util';
 import { GenreToIdMap } from '../utils/genreToId.util';
-import { AnimeDetailsDto, AnimeDetailsResponseDto } from './dto/response/anime-details.dto';
+import {
+  AnimeDetailsDto,
+  AnimeDetailsResponseDto,
+} from './dto/response/anime-details.dto';
 
 @Injectable()
 export class AnimeService {
@@ -30,19 +35,35 @@ export class AnimeService {
   async getExploreRecommendation(): Promise<ExploreResponseDto[]> {
     this.logger.log('Fetching explore recommendation data...');
     const exploreData: GenreReturn[] = [];
+    const animeIdSet = new Set<string>();
     for (const genreName of Object.values(AvailableGenres)) {
       for (let i = 0; i < 2; i++) {
         this.logger.log(
           `Trying to fetch genre: ${genreName}, attempt ${i + 1}`,
         );
         const data = await this.jikan.getAnimeByGenre({
-          limit: 1,
+          limit: 10,
           genreId: GenreToIdMap[genreName as AvailableGenres],
         });
         if (data.data.length > 0) {
+          // Ensure unique animes across genres
+          let filtered = data.data.find((anime) => {
+            if (animeIdSet.has(anime.images.jpg.large_image_url)) {
+              return false;
+            }
+            animeIdSet.add(anime.images.jpg.large_image_url);
+            return true;
+          });
+          if (!filtered) {
+            this.logger.warn(
+              `All animes for genre: ${genreName} are duplicates. Skipping...`,
+            );
+            filtered = data.data[0]; // Fallback to at least one anime
+          }
           exploreData.push({
             length: data.data.length,
-            animes: data.data,
+            key: genreName,
+            animes: [filtered],
           });
           break;
         }
@@ -56,7 +77,7 @@ export class AnimeService {
     return exploreData.map((data) => {
       const genre = data.animes;
       return {
-        genre: genre[0].genres[0].name,
+        genre: data.key,
         image: genre[0].images.jpg.large_image_url,
       };
     }) as ExploreResponseDto[];
@@ -64,34 +85,40 @@ export class AnimeService {
 
   async getStaffRecommendation(): Promise<StaffDto[]> {
     this.logger.log('Fetching staff recommendation data...');
-    const animes: Season[] = await this.jikan.getSeasonAnime(3);
+    const animes: Season[] = await this.jikan.getSeasonAnime(20);
 
-    return animes.map((anime) => {
-      return {
-        mal_id: anime.mal_id,
-        sinopses: anime.synopsis,
-        title: anime.title,
-        image_url: anime.images.jpg.large_image_url,
-        year: String(anime?.year),
-        episodes: String(anime?.episodes),
-        genres: anime.genres.map((genre) => {
-          return {
-            mal_id: genre.mal_id,
-            type: genre.type,
-            name: genre.name,
-          };
-        }),
-      };
-    }) as StaffDto[];
+    return animes
+      .filter((animes) => {
+        return animes.airing;
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map((anime) => {
+        return {
+          mal_id: anime.mal_id,
+          sinopses: anime.synopsis,
+          title: anime.title_english || anime.title,
+          image_url: anime.images.jpg.large_image_url,
+          year: String(anime?.year),
+          episodes: String(anime?.episodes),
+          genres: anime.genres.map((genre) => {
+            return {
+              mal_id: genre.mal_id,
+              type: genre.type,
+              name: genre.name,
+            };
+          }),
+        };
+      });
   }
 
   async getPopularRecommendation(): Promise<PopularDto[]> {
     this.logger.log('Fetching popular recommendation data...');
-    const animes: Tops[] = await this.jikan.getPopularRecomendation(10);
+    const animes: Tops[] = await this.jikan.getPopularRecomendation(8);
     return animes.map((anime: Tops) => {
       return {
         mal_id: anime.mal_id,
-        title: anime.title,
+        title: anime.title_english || anime.title,
         image_url: anime.images.jpg.image_url,
         score: anime.score,
         status: anime.status,
@@ -103,13 +130,15 @@ export class AnimeService {
           };
         }),
       };
-    }) as PopularDto[];
+    });
   }
 
   async getAnimeByGenre(
     genreOptions: AvailableGenres,
     page: number,
     year?: number,
+    minScore?: number,
+    type?: 'movie' | 'series',
   ): Promise<GenreTabDto> {
     this.logger.log(
       `Fetching anime by genre: ${genreOptions}, page: ${page}${year ? ', year: ' + year : ''}`,
@@ -119,6 +148,8 @@ export class AnimeService {
       limit: 20,
       page: page,
       year: year,
+      type: type,
+      minScore: minScore,
     });
 
     return {
@@ -131,7 +162,7 @@ export class AnimeService {
       data: animes.data.map((anime) => {
         return {
           mal_id: anime.mal_id,
-          title: anime.title,
+          title: anime.title_english || anime.title,
           image_url: anime.images.jpg.large_image_url,
           score: anime.score,
           type: anime.type == 'TV' ? 'Series' : anime.type,
@@ -139,14 +170,11 @@ export class AnimeService {
           season: anime.season,
           year: anime.year,
         };
-      }) as GenreDetailDto[],
+      }),
     };
   }
 
-  async getAnimeByName(
-    name: string,
-    page: number,
-  ): Promise<SearchPaginated> {
+  async getAnimeByName(name: string, page: number): Promise<SearchPaginated> {
     this.logger.log(`Searching anime by name: ${name}, page: ${page}`);
     const searchAnime: IAnimeQuery = await this.jikan.getAnimeByName(
       name,
@@ -163,7 +191,7 @@ export class AnimeService {
       data: searchAnime.data.map((anime) => {
         return {
           mal_id: anime.mal_id,
-          title: anime.title,
+          title: anime.title_english || anime.title,
           year: anime.year,
           episodes: anime.episodes,
           status: anime.status,
@@ -179,7 +207,7 @@ export class AnimeService {
           type: anime.type == 'TV' ? 'Series' : anime.type,
           season: anime.season,
         };
-      }) as SearchResponseDto[],
+      }),
     };
   }
 
@@ -189,6 +217,7 @@ export class AnimeService {
 
     return {
       title: animeDetails.title,
+      title_english: animeDetails.title_english,
       image_url: animeDetails.images.jpg.large_image_url,
       mal_id: malId,
       score: animeDetails.score,

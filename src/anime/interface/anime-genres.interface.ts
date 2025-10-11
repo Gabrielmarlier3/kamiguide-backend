@@ -96,7 +96,6 @@ export enum AvailableGenres {
   Supernatural = 'Supernatural',
   Suspense = 'Suspense',
   Detective = 'Detective',
-  Educational = 'Educational',
   Historical = 'Historical',
   Isekai = 'Isekai',
   MartialArts = 'Martial Arts',

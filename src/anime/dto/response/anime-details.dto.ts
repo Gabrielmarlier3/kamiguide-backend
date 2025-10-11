@@ -38,6 +38,13 @@ export class AnimeDetailsDto {
   })
   title!: string;
 
+
+  @ApiProperty({
+    example: 'Fullmetal Alchemist: Brotherhood',
+    description: 'Official english anime title',
+  })
+  title_english!: string;
+
   @ApiProperty({
     example: 'https://cdn.myanimelist.net/images/anime/1223/96541.jpg',
     description: 'Main anime image',

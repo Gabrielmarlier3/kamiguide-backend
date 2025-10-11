@@ -8,7 +8,6 @@ import { Agent } from 'https';
 import axios, { AxiosResponse, isAxiosError } from 'axios';
 import * as dns from 'node:dns';
 import { IGenreAnimeFilter } from './interface/genre-anime.interface';
-import { GenreReturn } from './interface/genre-return.interface';
 import { IScheculeInterface } from './interface/schedule.interface';
 import { ScheduleFilter } from './interface/scheduleFilter.interface';
 
@@ -102,6 +101,14 @@ export class JikanService {
         sfw: 'true',
         page: (filter.page ?? 1).toString(),
       });
+
+      if (filter.minScore) {
+        params.append('min_score', filter.minScore.toString());
+      }
+
+      if (filter.type) {
+        params.append('type', filter.type == 'movie' ? filter.type : 'tv');
+      }
 
       if (filter.year) {
         params.append('start_date', `${filter.year}-01-01`);

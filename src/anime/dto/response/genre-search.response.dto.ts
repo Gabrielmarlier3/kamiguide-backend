@@ -11,7 +11,7 @@ export class GenreDetailDto {
     example: 'Fullmetal Alchemist: Brotherhood',
     description: 'Official anime title.',
   })
-  title!: string;
+  title: string;
 
   @ApiProperty({
     example: 'https://cdn.myanimelist.net/images/anime/1208/94745.jpg',
@@ -23,13 +23,13 @@ export class GenreDetailDto {
     example: 9.1,
     description: 'Average score on MyAnimeList.',
   })
-  score!: number;
+  score?: number;
 
   @ApiProperty({
     example: 'Spring',
     description: 'Season when the anime was released.',
   })
-  season!: string;
+  season?: string;
 
   @ApiProperty({
     example: 'Finished Airing',
@@ -47,7 +47,7 @@ export class GenreDetailDto {
     example: 2009,
     description: 'Release year of the anime.',
   })
-  year!: number;
+  year?: number;
 }
 
 export class PaginationDto {

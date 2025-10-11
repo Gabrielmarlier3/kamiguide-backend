@@ -35,4 +35,26 @@ export class GetAnimeByGenreDto {
     message: 'Year must not exceed next year',
   })
   year?: number;
+
+  @ApiPropertyOptional({
+    example: 8,
+    description: 'Score of anime (0 to 10).',
+    minimum: 0,
+    maximum: 10,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'Score must be a number' })
+  @Min(0, { message: 'Score must be between 0 and 10' })
+  @Max(10, { message: 'Score must be between 0 and 10' })
+  min_score?: number;
+
+  @ApiPropertyOptional({
+    enum: ['series', 'movie'],
+    example: 'series',
+    description: 'Tipo de anime: "series" ou "movie".',
+  })
+  @IsOptional()
+  @IsEnum(['series', 'movie'], { message: 'Type deve ser "series" ou "movie"' })
+  type?: 'series' | 'movie';
 }

@@ -18,7 +18,6 @@ export const GenreToIdMap: Record<AvailableGenres, number> = {
   [AvailableGenres.Supernatural]: AnimeGenreId.Supernatural,
   [AvailableGenres.Suspense]: AnimeGenreId.Suspense,
   [AvailableGenres.Detective]: AnimeGenreId.Detective,
-  [AvailableGenres.Educational]: AnimeGenreId.Educational,
   [AvailableGenres.Historical]: AnimeGenreId.Historical,
   [AvailableGenres.Isekai]: AnimeGenreId.Isekai,
   [AvailableGenres.MartialArts]: AnimeGenreId.MartialArts,

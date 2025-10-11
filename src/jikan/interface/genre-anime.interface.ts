@@ -20,4 +20,6 @@ export interface IGenreAnimeFilter {
   sort?: 'desc' | 'asc';
   limit?: number;
   year?: number;
+  minScore?: number;
+  type?: 'series' | 'movie';
 }
