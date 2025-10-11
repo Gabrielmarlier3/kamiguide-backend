@@ -8,24 +8,12 @@ import { GenreReturn } from '../jikan/interface/genre-return.interface';
 import { AvailableGenres } from './interface/anime-genres.interface';
 import { ExploreResponseDto } from './dto/response/explore.response.dto';
 import { StaffDto } from './dto/response/staff-recomendation.response.dto';
-import {
-  PopularDto,
-  PopularResponseDto,
-} from './dto/response/popular.response.dto';
-import {
-  GenreDetailDto,
-  GenreTabDto,
-} from './dto/response/genre-search.response.dto';
-import {
-  SearchPaginated,
-  SearchResponseDto,
-} from './dto/response/search.response.dto';
+import { PopularDto } from './dto/response/popular.response.dto';
+import { GenreTabDto } from './dto/response/genre-search.response.dto';
+import { SearchPaginated } from './dto/response/search.response.dto';
 import { sleep } from '../utils/sleep.util';
 import { GenreToIdMap } from '../utils/genreToId.util';
-import {
-  AnimeDetailsDto,
-  AnimeDetailsResponseDto,
-} from './dto/response/anime-details.dto';
+import { AnimeDetailsDto } from './dto/response/anime-details.dto';
 
 @Injectable()
 export class AnimeService {
@@ -167,7 +155,7 @@ export class AnimeService {
           score: anime.score,
           type: anime.type == 'TV' ? 'Series' : anime.type,
           status: anime.status,
-          season: anime.season,
+          season: anime.season || 'Unknown',
           year: anime.year,
         };
       }),
@@ -205,7 +193,7 @@ export class AnimeService {
             };
           }),
           type: anime.type == 'TV' ? 'Series' : anime.type,
-          season: anime.season,
+          season: anime.season ?? 'Unknown',
         };
       }),
     };
@@ -216,8 +204,7 @@ export class AnimeService {
     const animeDetails = await this.jikan.getAnimeDetailsById(malId);
 
     return {
-      title: animeDetails.title,
-      title_english: animeDetails.title_english,
+      title: animeDetails.title_english ?? animeDetails.title,
       image_url: animeDetails.images.jpg.large_image_url,
       mal_id: malId,
       score: animeDetails.score,
@@ -225,7 +212,7 @@ export class AnimeService {
       status: animeDetails.status,
       synopsis: animeDetails.synopsis,
       type: animeDetails.type == 'TV' ? 'Series' : animeDetails.type,
-      year: animeDetails.year ?? 0,
+      year: animeDetails.year ?? 'Unknown',
       streaming: animeDetails.streaming.map((stream) => ({
         name: stream.name,
         url: stream.url,

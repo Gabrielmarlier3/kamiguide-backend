@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { EmailModule } from './email/email.module';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
       models: [],
       logging: false,
     }),
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],
