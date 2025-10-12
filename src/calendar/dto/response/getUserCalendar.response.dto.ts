@@ -43,12 +43,6 @@ export class GetUserCalendarDto {
   releaseTime: string;
 
   @ApiProperty({
-    example: 64,
-    description: 'Total number of episodes for the anime',
-  })
-  episodeCount: number;
-
-  @ApiProperty({
     example: 'https://cdn.myanimelist.net/images/anime/1208/94745.jpg',
     description: 'URL of the cover image for the anime',
   })

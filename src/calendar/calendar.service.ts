@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { JikanService } from '../jikan/jikan.service';
 import { ScheduleFilter } from '../jikan/interface/scheduleFilter.interface';
-import { GetUserCalendarDto, GetUserCalendarResponseDto } from './dto/response/getUserCalendar.response.dto';
+import { GetUserCalendarDto } from './dto/response/getUserCalendar.response.dto';
 import { Schedule } from '../jikan/interface/schedule.interface';
 import { InjectModel } from '@nestjs/sequelize';
 import { CalendarModel } from './calendar.model';
@@ -27,9 +27,7 @@ export class CalendarService {
     private readonly calendarModel: typeof CalendarModel,
   ) {}
 
-  async getCalendar(
-    filter: ScheduleFilter,
-  ): Promise<GetUserCalendarDto[]> {
+  async getCalendar(filter: ScheduleFilter): Promise<GetUserCalendarDto[]> {
     try {
       this.logger.log(
         `Fetching calendar for ${filter.day} - Page: ${filter.page}`,
@@ -49,9 +47,7 @@ export class CalendarService {
     }
   }
 
-  async getUserCalendar(
-    userUid: string,
-  ): Promise<GetUserCalendarDto[]> {
+  async getUserCalendar(userUid: string): Promise<GetUserCalendarDto[]> {
     try {
       const userCalendar = await this.calendarModel.findAll({
         where: { user_uid: userUid },
@@ -193,7 +189,6 @@ export class CalendarService {
             title: jikanAnime.title,
             day: jikanAnime.day,
             release_time: jikanAnime.releaseTime,
-            episode_count: jikanAnime.episodeCount,
             image_url: jikanAnime.imageUrl,
             last_week: hasEnded,
           },
@@ -246,7 +241,7 @@ export class CalendarService {
             malId: anime.mal_id,
             title: anime.title,
             releaseTime: anime.broadcast.time ?? null,
-            imageUrl: anime.images.jpg.small_image_url,
+            imageUrl: anime.images.jpg.image_url,
           }) as GetUserCalendarDto,
       );
   }

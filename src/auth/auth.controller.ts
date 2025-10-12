@@ -2,7 +2,11 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
-import { ApiBadRequestResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login.response.dto';
 import { RefreshResponseDto } from './dto/refresh.response.dto';
 
@@ -15,11 +19,11 @@ export class AuthController {
     description: 'User logged in successfully',
     type: LoginResponseDto,
   })
-  @ApiBadRequestResponse({
+  @ApiUnauthorizedResponse({
     description: 'Invalid email or password',
     schema: {
       example: {
-        statusCode: 400,
+        statusCode: 401,
         message: 'Invalid login credentials',
         error: 'Bad Request',
       },
@@ -34,11 +38,11 @@ export class AuthController {
     description: 'Token refreshed successfully',
     type: RefreshResponseDto,
   })
-  @ApiBadRequestResponse({
+  @ApiUnauthorizedResponse({
     description: 'Invalid or expired refresh token',
     schema: {
       example: {
-        statusCode: 400,
+        statusCode: 401,
         message: 'Invalid refresh token',
         error: 'Bad Request',
       },

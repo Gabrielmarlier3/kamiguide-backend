@@ -144,6 +144,8 @@ export class CalendarController {
   }
 
   @Delete('user/:mal_id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiOkResponse({
     description: 'Remove an anime from user calendar and return updated list.',
     type: [GetUserCalendarResponseDto],

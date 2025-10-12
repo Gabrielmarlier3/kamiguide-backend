@@ -1,5 +1,10 @@
 import * as firebaseAdmin from 'firebase-admin';
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateRequest } from 'firebase-admin/lib/auth/auth-config';
 import { auth } from 'firebase-admin';
 import UserRecord = auth.UserRecord;
@@ -112,7 +117,7 @@ export class FirebaseService {
           USER_DISABLED: 'User disabled',
         }[messageKey] ?? messageKey;
 
-      throw new BadRequestException(message);
+      throw new UnauthorizedException(message);
     }
 
     throw new Error(error?.message);

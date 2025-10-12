@@ -8,7 +8,16 @@ export async function getOrSet<T>(
   loader: () => Promise<T>,
 ): Promise<{ payload: T; fetchedAt: string }> {
   const hit = await redis.get(key);
-  if (hit) return JSON.parse(hit) as { payload: T; fetchedAt: string };
+  if (hit) {
+    const response = JSON.parse(hit);
+    if (!response?.payload) {
+      return {
+        payload: response,
+        fetchedAt: new Date().toISOString(),
+      };
+    }
+    return response as { payload: T; fetchedAt: string };
+  }
 
   //Simple distributed lock to not overload the source with many requests
   const lockKey = `${key}:lock`;
@@ -17,7 +26,16 @@ export async function getOrSet<T>(
     //wait a bit and try get if someone else already loaded the cache return else load ourselves
     await sleep(1000);
     const retry = await redis.get(key);
-    if (retry) return JSON.parse(retry) as { payload: T; fetchedAt: string };
+    if (retry) {
+      const response = JSON.parse(retry);
+      if (!response?.payload) {
+        return {
+          payload: response,
+          fetchedAt: new Date().toISOString(),
+        };
+      }
+      return response as { payload: T; fetchedAt: string };
+    }
   }
 
   try {
@@ -25,11 +43,11 @@ export async function getOrSet<T>(
     const jitter = Math.floor(Math.random() * 300); // até +5 min
     await redis.set(
       key,
-      JSON.stringify({ payload, fetchedAt: new Date().toISOString() }),
+      JSON.stringify({ payload: payload, fetchedAt: new Date().toISOString() }),
       'EX',
       ttlSec + jitter,
     );
-    return { payload, fetchedAt: new Date().toISOString() } as any as {
+    return { payload: payload, fetchedAt: new Date().toISOString() } as any as {
       payload: T;
       fetchedAt: string;
     };
