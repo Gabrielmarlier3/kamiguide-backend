@@ -192,7 +192,7 @@ export class AnimeService {
               name: genre.name,
             };
           }),
-          type: anime.type == 'TV' ? 'Series' : anime.type,
+          type: anime.type == 'TV' ? 'Series' : (anime.type ?? 'Unknown'),
           season: anime.season ?? 'Unknown',
         };
       }),
