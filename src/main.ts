@@ -28,10 +28,10 @@ function configureSwagger(app: INestApplication) {
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-  app.enableCors({
-    origin: '*',
-    credentials: true,
-  });
+  // app.enableCors({
+  //   origin: '*',
+  //   credentials: true,
+  // });
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 }
